@@ -26,8 +26,8 @@ public class DSProjectController {
 
 	private ArrayList<File> fileList = new ArrayList<>();
 	private File searchDirectory = null;
-	private boolean filterMD5 = true;
-	private boolean filterSize = false;
+	private boolean filterMD5 = false;
+	private boolean filterSize = true;
 
 
     @FXML
@@ -113,24 +113,25 @@ public class DSProjectController {
 	ArrayList<File> getFileList(File file){
 		ArrayList list = new ArrayList<>();
 		if(file.isFile()){
+			System.out.println(file.getAbsoluteFile().toString());
 			list.add(file);
 		}
 		else if(file.isDirectory()){
 			String[] files = file.list();
 			if(files != null){
 				for(String entry : files){
-					System.out.println(entry);
 					File temp = new File(file, entry);
 					list.addAll(getFileList(temp));
 				}
 			}
 		}
+		System.gc();
 		return list;
 	}
 	void populateTreeViewAndRemoveExcess(File file){
 		fileList = getFileList(searchDirectory);
 		for(File singleFile : fileList){
-			System.out.println(singleFile);
+//			System.out.println(singleFile);
 			TreeItem<String> fileItem = new TreeItem<String> (singleFile.getName());
 			ArrayList<String> duplicates = populateList(singleFile, searchDirectory);
 			for(String duplicate : duplicates){
@@ -151,12 +152,13 @@ public class DSProjectController {
 			}
 			for(int counter2 = counter1+1; counter2 < nodeList.size(); counter2++){
 				if(nodeList.get(counter2).getValue().equals(nodeList.get(counter1).getValue())){
-					System.out.println("equals");
+//					System.out.println("equals");
 					excess.add(nodeList.get(counter2));
 				}
 			}
 		}
 		nodeList.removeAll(excess);
+		System.gc();
 	}
     @FXML
     void selectFolder(ActionEvent event) {
@@ -169,6 +171,7 @@ public class DSProjectController {
 			populateTreeViewAndRemoveExcess(searchDirectory);
 			sizeCheckBox.setDisable(false);
 			md5CheckBox.setDisable(false);
+			System.gc();
 		}
 	}
 	boolean verifyMD5(File origin, File file){
