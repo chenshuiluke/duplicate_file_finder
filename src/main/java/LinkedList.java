@@ -102,11 +102,11 @@ public class LinkedList
 		}
 		else
 		{
-			if(index>(counter+1))
+			if(index>counter)
 				System.out.println("Out of bounds");
 			else
 			{
-				for (int a=1; a<index-1;a++)
+				for (int a=0; a<=index;a++)
 				temp=temp.getNext();
 				
 			
