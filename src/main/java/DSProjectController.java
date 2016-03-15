@@ -132,11 +132,13 @@ public class DSProjectController {
 		for(File singleFile : fileList){
 			System.out.println(singleFile);
 			TreeItem<String> fileItem = new TreeItem<String> (singleFile.getName());
-			fileItem.getChildren().add(new TreeItem<String>(singleFile.getAbsoluteFile().toString()));
 			ArrayList<String> duplicates = populateList(singleFile, searchDirectory);
 			for(String duplicate : duplicates){
 				TreeItem<String> item = new TreeItem<String>(duplicate);
 				fileItem.getChildren().add(item);
+			}
+			if(fileItem.getChildren().size() > 0){
+				fileItem.getChildren().add(new TreeItem<String>(singleFile.getAbsoluteFile().toString()));
 			}
 			duplicateList.getRoot().getChildren().add(fileItem);
 		}
