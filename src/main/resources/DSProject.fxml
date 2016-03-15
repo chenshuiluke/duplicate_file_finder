@@ -4,6 +4,7 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
@@ -23,7 +24,7 @@
    <children>
       <Button defaultButton="true" mnemonicParsing="false" onAction="#selectFile" text="Select Original File" />
       <Button fx:id="folderButton" disable="true" mnemonicParsing="false" onAction="#selectFolder" text="Select Search Folder" GridPane.columnIndex="1" />
-      <ListView fx:id="duplicateList" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1" />
+      <ListView fx:id="duplicateList" onMouseClicked="#getSelected" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1" />
       <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
          <children>
             <Label layoutX="10.0" layoutY="46.0" text="Filters">
@@ -31,8 +32,9 @@
                   <Font size="18.0" />
                </font>
             </Label>
-            <CheckBox mnemonicParsing="false" onMouseClicked="#toggleMD5Filter" text="MD5" />
-            <CheckBox layoutX="10.0" layoutY="31.0" mnemonicParsing="false" onMouseClicked="#toggleSizeFilter" text="Size" />
+            <CheckBox fx:id="md5CheckBox" disable="true" mnemonicParsing="false" onMouseClicked="#toggleMD5Filter" text="MD5" />
+            <CheckBox fx:id="sizeCheckBox" disable="true" layoutX="10.0" layoutY="31.0" mnemonicParsing="false" onMouseClicked="#toggleSizeFilter" text="Size" />
+            <Separator layoutX="10.0" layoutY="154.0" prefWidth="200.0" />
             <Label text="File Information">
                <font>
                   <Font size="18.0" />
@@ -46,6 +48,15 @@
             <Text fx:id="originalFileName" strokeType="OUTSIDE" strokeWidth="0.0" text="Name:" wrappingWidth="271.39617919921875" />
             <Text fx:id="originalFileSize" strokeType="OUTSIDE" strokeWidth="0.0" text="Size:" wrappingWidth="272.3987731933594" />
             <Text fx:id="originalFileHash" layoutX="10.0" layoutY="60.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Hash:" wrappingWidth="274.4670715332031" />
+            <Separator prefWidth="200.0" />
+            <Text layoutX="10.0" layoutY="102.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Selected" wrappingWidth="159.39617919921875">
+               <font>
+                  <Font size="15.0" />
+               </font>
+            </Text>
+            <Text fx:id="selectedFileName" layoutX="10.0" layoutY="119.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Name:" wrappingWidth="271.39617919921875" />
+            <Text fx:id="selectedFileSize" layoutX="10.0" layoutY="135.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Size:" wrappingWidth="272.3987731933594" />
+            <Text fx:id="selectedFileHash" layoutX="10.0" layoutY="151.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Hash:" wrappingWidth="274.4670715332031" />
          </children>
       </VBox>
    </children>
