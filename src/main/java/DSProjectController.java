@@ -13,6 +13,7 @@ import javafx.scene.text.TextFlow;
 import javafx.scene.text.Text;
 import javafx.scene.control.Button;
 import javafx.collections.FXCollections;
+import javafx.scene.control.CheckBox;
 
 public class DSProjectController {
 
@@ -22,14 +23,34 @@ public class DSProjectController {
 	private boolean filterMD5 = false;
 	private boolean filterSize = false;
 
+
+    @FXML
+    private CheckBox md5CheckBox;
+
+    @FXML
+    private CheckBox sizeCheckBox;
+
+    @FXML
+    private Text selectedFileName;
+
+    @FXML
+    private Text selectedFileSize;
+
+    @FXML
+    private Text selectedFileHash;
+
     @FXML
     void toggleMD5Filter() {
 		filterMD5 = !filterMD5;
+		clearList();
+		populateList(searchDirectory);
     }
 
     @FXML
     void toggleSizeFilter() {
 		filterSize = !filterSize;
+		clearList();
+		populateList(searchDirectory);
     }
 
 
@@ -57,6 +78,28 @@ public class DSProjectController {
     private ListView<String> duplicateList;
 
     @FXML
+    void getSelected(){
+		String item = duplicateList.getSelectionModel().getSelectedItem();
+		if(item != null){
+			File file = new File(item);
+			selectedFileName.setText("Name: " + file.getName());
+			selectedFileSize.setText("Size: " + file.length() + " bytes");
+			selectedFileHash.setText("Hash: " + getMD5(file));
+		}
+    }
+	private String getMD5(File file){
+		String md5 = "";
+		try{
+			FileInputStream fis = new FileInputStream(file);
+			md5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
+			fis.close();
+		}
+		catch(java.io.IOException i_exc){
+			i_exc.printStackTrace();
+		}
+		return md5;
+	}
+    @FXML
     void selectFile(ActionEvent event) {
 		FileChooser chooser = new FileChooser();
 		chooser.setTitle("Choose the original file");
@@ -65,18 +108,14 @@ public class DSProjectController {
 			originalFile = file;	
 			originalFileName.setText("Name: " + originalFile.getName());
 			originalFileSize.setText("Size: " + String.valueOf(originalFile.length() + " bytes"));
-			try{
-				FileInputStream fis = new FileInputStream(originalFile);
-				String md5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
-				originalMD5 = md5;
-				originalFileHash.setText("Hash: " + md5);
-				folderButton.setDisable(false);
-			}
-			catch(java.io.IOException i_exc){
-				i_exc.printStackTrace();
-			}
+			originalFileHash.setText("Hash: " + getMD5(originalFile));
+			originalMD5 = getMD5(originalFile);
+			folderButton.setDisable(false);
 		}
     }
+	private void clearList(){
+		duplicateList.setItems(FXCollections.observableArrayList()); //Empties the current duplicate list
+	}
 
     @FXML
     void selectFolder(ActionEvent event) {
@@ -85,21 +124,14 @@ public class DSProjectController {
 		File directory = chooser.showDialog(null);
 		if(directory != null){
 			searchDirectory = directory; 
-			duplicateList.setItems(FXCollections.observableArrayList()); //Empties the current duplicate list
+			clearList();
 			populateList(searchDirectory);
+			sizeCheckBox.setDisable(false);
+			md5CheckBox.setDisable(false);
 		}
 	}
 	boolean verifyMD5(File file){
-		try{
-			FileInputStream fis = new FileInputStream(file);
-			String md5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
-			return md5.equals(originalMD5);
-		}
-		catch(java.io.IOException i_exc){
-			i_exc.printStackTrace();
-		}
-		return false;
-
+		return getMD5(file).equals(originalMD5);
 	}
 	boolean isAbsoluteFilePathEqual(File file){
 		return file.getAbsoluteFile().toString().equals(originalFile.getAbsoluteFile().toString());
