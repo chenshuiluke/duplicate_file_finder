@@ -4,3 +4,11 @@ plugins{
 }
 mainClassName = "dsproject.DSProject"
 
+repositories {
+    mavenCentral()
+}
+
+dependencies{
+	compile group: 'commons-codec', name: 'commons-codec', version: '1.10'
+}
+

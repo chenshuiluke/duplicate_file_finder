@@ -8,11 +8,31 @@ import javafx.scene.control.ListView;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import java.io.File;
+import java.io.FileInputStream;
+import javafx.scene.text.TextFlow;
+import javafx.scene.text.Text;
+import javafx.scene.control.Button;
 
 public class DSProjectController {
 
 	private File originalFile = null;
 	private File searchDirectory = null;
+	private String originalMD5 = "";
+
+    @FXML
+    private Button folderButton;
+    @FXML
+    private Text originalFileName;
+
+    @FXML
+    private Text originalFileSize;
+
+    @FXML
+    private Text originalFileHash;
+
+    @FXML
+    private Text statusText;
+
     @FXML
     private ResourceBundle resources;
 
@@ -29,6 +49,18 @@ public class DSProjectController {
 		File file = chooser.showOpenDialog(null);
 		if(file != null){
 			originalFile = file;	
+			originalFileName.setText("Name: " + originalFile.getName());
+			originalFileSize.setText("Size: " + String.valueOf(originalFile.length() + " bytes"));
+			try{
+				FileInputStream fis = new FileInputStream(originalFile);
+				String md5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
+				originalMD5 = md5;
+				originalFileHash.setText("Hash: " + md5);
+				folderButton.setDisable(false);
+			}
+			catch(java.io.IOException i_exc){
+				i_exc.printStackTrace();
+			}
 		}
     }
 
@@ -45,7 +77,21 @@ public class DSProjectController {
 	void populateList(File file){
 		//add file only
 		if(file.isFile()){
-			duplicateList.getItems().add(file.getAbsoluteFile().toString());	
+			if(!file.getAbsoluteFile().toString().equals(originalFile.getAbsoluteFile().toString())
+				&& file.length() == originalFile.length()){
+				try{
+					FileInputStream fis = new FileInputStream(file);
+					String md5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
+					if(md5.equals(originalMD5)){
+						duplicateList.getItems().add(file.getAbsoluteFile().toString());	
+					}
+					
+				}
+				catch(java.io.IOException i_exc){
+					i_exc.printStackTrace();
+				}
+			}
+			
 		}
 		else if(file.isDirectory()){
 			String[] subNote = file.list();
