@@ -31,8 +31,8 @@
                   <Font size="18.0" />
                </font>
             </Label>
-            <CheckBox fx:id="md5CheckBox" disable="true" mnemonicParsing="false" onMouseClicked="#toggleMD5Filter" selected="true" text="MD5" />
-            <CheckBox fx:id="sizeCheckBox" disable="true" layoutX="10.0" layoutY="31.0" mnemonicParsing="false" onMouseClicked="#toggleSizeFilter" text="Size" />
+            <CheckBox fx:id="md5CheckBox" disable="true" mnemonicParsing="false" onMouseClicked="#toggleMD5Filter" text="MD5" />
+            <CheckBox fx:id="sizeCheckBox" disable="true" layoutX="10.0" layoutY="31.0" mnemonicParsing="false" onMouseClicked="#toggleSizeFilter" selected="true" text="Size" />
             <Separator layoutX="10.0" layoutY="154.0" prefWidth="200.0" />
             <Label text="File Information">
                <font>
