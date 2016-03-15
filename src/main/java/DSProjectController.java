@@ -12,12 +12,26 @@ import java.io.FileInputStream;
 import javafx.scene.text.TextFlow;
 import javafx.scene.text.Text;
 import javafx.scene.control.Button;
+import javafx.collections.FXCollections;
 
 public class DSProjectController {
 
 	private File originalFile = null;
 	private File searchDirectory = null;
 	private String originalMD5 = "";
+	private boolean filterMD5 = false;
+	private boolean filterSize = false;
+
+    @FXML
+    void toggleMD5Filter() {
+		filterMD5 = !filterMD5;
+    }
+
+    @FXML
+    void toggleSizeFilter() {
+		filterSize = !filterSize;
+    }
+
 
     @FXML
     private Button folderButton;
@@ -71,24 +85,46 @@ public class DSProjectController {
 		File directory = chooser.showDialog(null);
 		if(directory != null){
 			searchDirectory = directory; 
+			duplicateList.setItems(FXCollections.observableArrayList()); //Empties the current duplicate list
 			populateList(searchDirectory);
 		}
+	}
+	boolean verifyMD5(File file){
+		try{
+			FileInputStream fis = new FileInputStream(file);
+			String md5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
+			return md5.equals(originalMD5);
+		}
+		catch(java.io.IOException i_exc){
+			i_exc.printStackTrace();
+		}
+		return false;
+
+	}
+	boolean isAbsoluteFilePathEqual(File file){
+		return file.getAbsoluteFile().toString().equals(originalFile.getAbsoluteFile().toString());
 	}
 	void populateList(File file){
 		//add file only
 		if(file.isFile()){
-			if(!file.getAbsoluteFile().toString().equals(originalFile.getAbsoluteFile().toString())
-				&& file.length() == originalFile.length()){
-				try{
-					FileInputStream fis = new FileInputStream(file);
-					String md5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
-					if(md5.equals(originalMD5)){
+			if(!isAbsoluteFilePathEqual(file)){
+				if(filterSize && filterMD5){
+					if(file.length() == originalFile.length() && verifyMD5(file)){
+							duplicateList.getItems().add(file.getAbsoluteFile().toString());	
+					}
+				}
+				else if(filterSize){
+					if(file.length() == originalFile.length()){
 						duplicateList.getItems().add(file.getAbsoluteFile().toString());	
 					}
-					
 				}
-				catch(java.io.IOException i_exc){
-					i_exc.printStackTrace();
+				else if(filterMD5){
+					if(verifyMD5(file)){
+						duplicateList.getItems().add(file.getAbsoluteFile().toString());	
+					}
+				}
+				else{
+					duplicateList.getItems().add(file.getAbsoluteFile().toString());	
 				}
 			}
 			
