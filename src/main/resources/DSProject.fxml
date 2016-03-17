@@ -14,7 +14,7 @@
 
 <GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="756.0" xmlns="http://javafx.com/javafx/8.0.76-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dsproject.DSProjectController">
   <columnConstraints>
-    <ColumnConstraints hgrow="SOMETIMES" maxWidth="542.0" minWidth="10.0" percentWidth="20.0" prefWidth="100.0" />
+    <ColumnConstraints hgrow="SOMETIMES" maxWidth="542.0" minWidth="10.0" percentWidth="40.0" prefWidth="100.0" />
     <ColumnConstraints hgrow="SOMETIMES" maxWidth="886.0" minWidth="10.0" prefWidth="534.0" />
   </columnConstraints>
   <rowConstraints>
@@ -24,7 +24,7 @@
       <TreeView fx:id="duplicateList" onMouseClicked="#getSelected" prefHeight="400.0" prefWidth="559.0" GridPane.columnIndex="1" />
       <VBox prefHeight="400.0" prefWidth="147.0">
          <children>
-            <Button fx:id="folderButton" defaultButton="true" mnemonicParsing="false" onAction="#selectFolder" text="Select Search Folder" />
+            <Button fx:id="folderButton" defaultButton="true" mnemonicParsing="false" onAction="#selectFolder" prefHeight="26.0" prefWidth="305.0" text="Select Search Folder" />
             <Label layoutX="10.0" layoutY="46.0" text="Filters">
                <font>
                   <Font size="18.0" />
@@ -45,7 +45,9 @@
             </Text>
             <Text fx:id="selectedFileName" layoutX="10.0" layoutY="119.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Name:" wrappingWidth="145.39617919921875" />
             <Text fx:id="selectedFileSize" layoutX="10.0" layoutY="135.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Size:" wrappingWidth="148.39877319335938" />
-            <Text fx:id="selectedFileHash" layoutX="10.0" layoutY="151.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Hash:" wrappingWidth="147.46707153320312" />
+            <Text fx:id="selectedFileHash" layoutX="10.0" layoutY="151.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Hash:" wrappingWidth="298.4670715332031" />
+            <Button fx:id="removeDuplicateButton" disable="true" mnemonicParsing="false" onAction="#removeDuplicateOnClick" prefHeight="26.0" prefWidth="302.0" text="Remove Item" />
+            <Button fx:id="removeOtherDuplicatesButton" disable="true" layoutX="10.0" layoutY="183.0" mnemonicParsing="false" onAction="#removeOthersOnClick" prefHeight="26.0" prefWidth="303.0" text="Delete Others" />
          </children>
       </VBox>
    </children>

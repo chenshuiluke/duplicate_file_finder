@@ -29,7 +29,56 @@ public class DSProjectController {
 	private boolean filterMD5 = true;
 	private boolean filterSize = true;
 
+    @FXML
+    void removeOthersOnClick(ActionEvent event) {
+    	try{
 
+	     	TreeItem<String> treeItem= duplicateList.getSelectionModel().getSelectedItem();
+	     	TreeItem<String> parent = treeItem.getParent();
+	     	if(parent != null){
+		     	ObservableList<TreeItem<String>> parentChildList = parent.getChildren();
+		     	ArrayList<TreeItem> excess = new ArrayList<>();
+		     	for(TreeItem<String> item : parentChildList){
+		     		//Will get concurrent modification exception if we remove an item while iterating
+		     		if(item != treeItem){
+						excess.add(item);	     			
+		     		}
+		     	}
+		     	for(TreeItem<String> excessItem : excess){
+		     			String name = excessItem.getValue();
+		     			Files.delete(Paths.get(name));
+		     			System.out.println("Deleted " + name);
+		     			parentChildList.remove(excessItem);
+		     	}	     		
+	     	}
+
+    	}
+    	catch(java.io.IOException e){
+    		e.printStackTrace();
+    	}
+    }
+    @FXML
+    void removeDuplicateOnClick(ActionEvent event) {
+    	try{
+	     	TreeItem<String> treeItem= duplicateList.getSelectionModel().getSelectedItem();
+	    	String name = treeItem.getValue();
+	    	Files.delete(Paths.get(name));
+	    	System.out.println("Deleted " + name);
+	    	TreeItem<String> parent = treeItem.getParent();
+	    	parent.getChildren().remove(treeItem);  
+	    	if(parent.getChildren().size() == 0){
+	    		duplicateList.getRoot().getChildren().remove(parent);
+	    	} 		
+    	}
+    	catch(java.io.IOException e){
+    		e.printStackTrace();
+    	}
+
+    }
+    @FXML
+    private Button removeOtherDuplicatesButton;
+    @FXML
+    private Button removeDuplicateButton;
     @FXML
     private CheckBox md5CheckBox;
 
@@ -86,13 +135,18 @@ public class DSProjectController {
 					selectedFileName.setText("Name: " + file.getName());
 					selectedFileSize.setText("Size: " + file.length() + " bytes");
 					selectedFileHash.setText("Hash: " + getMD5(file));
+					removeDuplicateButton.setDisable(false);
+					removeOtherDuplicatesButton.setDisable(false);
 				}
 				else{
 					selectedFileName.setText("Name: ");
 					selectedFileSize.setText("Size: ");
 					selectedFileHash.setText("Hash: ");
+					removeDuplicateButton.setDisable(true);
+					removeOtherDuplicatesButton.setDisable(true);
 				}
 			}
+
 		}
     }
 	private String getMD5(File file){
