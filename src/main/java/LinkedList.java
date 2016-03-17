@@ -1,3 +1,4 @@
+package dsproject;
 import java.io.File;
 
 
@@ -6,7 +7,7 @@ public class LinkedList
 {
 	
 	Node head;
-	static int counter=0;
+	int counter=0;
 	
 	public LinkedList()
 	{
@@ -17,19 +18,39 @@ public class LinkedList
 	{
 		return head==null;
 	}
-	
+	public int size(){
+		return counter;
+	}
 	public boolean insertf(File obj)
 	{
 		if (isEmpty())
 		{
-			head= new Node(obj);
+			head= new Node();
+			head.setNext(new Node(obj));
 			counter++;
+			//print();
 			return true;
 		}
 		else
 		{
-			head= new Node(obj, head);
+			Node newNode = new Node(obj);
+			if(head.getNext() == null){
+				head.setNext(newNode);
+			}
+			else{
+				Node temp = head.getNext();
+
+				head.setNext(newNode);
+				newNode.setNext(temp);
+
+
+			}
+
+			if(head == null){
+				System.out.println("NULLLLLL");
+			}
 			counter++;
+			//print();
 			return true;
 		}
 		
@@ -40,19 +61,20 @@ public class LinkedList
 		if (isEmpty())
 		{
 			head= new Node(obj);
-			counter++;
 			return true;
 		}
 		else
 		{
 			Node temp=head;
 			
-			while (temp.next!=null){
-				
-				temp=temp.next;
+			while (temp.getNext()!=null){				
+				temp=temp.getNext();
 			}
-			
-			temp.next=new Node(obj);
+			Node newNode = new Node(obj);
+			temp.setNext(newNode);
+			if(temp.getNext() == null){
+				System.out.println("NULL");
+			}
 			counter++;
 			return true;
 		}
@@ -77,7 +99,7 @@ public class LinkedList
 				System.out.println("Out of bounds");
 			else
 			{
-				for (int a=1; a<index-1;a++)
+				for (int a=0; a<index-1;a++)
 				{
 					temp=temp.getNext();
 				}
@@ -85,16 +107,18 @@ public class LinkedList
 				Node temp1=temp.getNext();
 				temp1=new Node(obj);
 				temp1.next=temp2;
+				counter++;
+				return true;
 			}
-			return true;	
+	
 		}
-		
+		return false;
 		
 	}
 	
-	public File returna(File obj, int index)// returns data at given position
+	public File returna(int index)// returns data at given position
 	{
-		Node temp=null;
+		Node temp=head;
 		if(isEmpty())
 		{
 			System.out.println("Empty List");
@@ -102,23 +126,57 @@ public class LinkedList
 		}
 		else
 		{
-			if(index>(counter+1))
+			if(index > counter)
 				System.out.println("Out of bounds");
 			else
 			{
-				for (int a=1; a<index-1;a++)
-				temp=temp.getNext();
-				
+				for (int a=0 ; a <= index;a++){
+					temp=temp.getNext();					
+				}
+				if(temp == null){
+					System.out.println("NULL @ " + index + "/" + counter );
+
+				}
+				//print();				
+				return temp.getData();					
 			
 			}
-				 
 		}
-		return temp.getData();
-		
+
+		return temp.getData();	
 	}
 		
 		
-	
-	
+	public void concat(LinkedList obj){
+		//print();
+		if(this == obj){
+			System.out.println("equals");
+			return;
+		}
+		int size = obj.size();
+		for(int counter1 = 0; counter1< size; counter1++){
+//			System.out.println("Start: ");
+			File temp = obj.returna(counter1);
+			if(temp!=null){
+				//System.out.println("Adding " + temp.getName());
+				boolean result = insertf(temp);
+				if(!result)
+					System.out.println("Not added");
+//				System.out.println("End ");
+//				print();
+			}
+		}
+	}
+	public void print(){
+		Node temp = head;
+		while(temp != null){
+			if(temp.getData() != null){
+				System.out.print(temp.getData().getAbsoluteFile().toString() + " ");
+			}
+			
+			temp = temp.getNext();
+		}
+		System.out.println(" size: " + counter);
+	}
 	
 }

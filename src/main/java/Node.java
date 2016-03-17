@@ -1,4 +1,4 @@
-
+package dsproject;
 import java.io.File;
 
 public class Node
@@ -33,6 +33,9 @@ public class Node
   public Node getNext()
   {
 	  return next;
+  }
+  public void setNext(Node obj){
+    this.next = obj;
   }
   
   public File getData()

@@ -24,7 +24,9 @@ import javafx.collections.ObservableList;
 
 public class DSProjectController {
 
-	private ArrayList<File> fileList = new ArrayList<>();
+	//private ArrayList<File> fileList = new ArrayList<>();
+	/**************************/
+	private LinkedList fileList = new LinkedList();
 	private File searchDirectory = null;
 	private boolean filterMD5 = false;
 	private boolean filterSize = true;
@@ -110,27 +112,28 @@ public class DSProjectController {
 	private void clearList(){
 		duplicateList.getRoot().getChildren().setAll(FXCollections.observableArrayList()); //Empties the current duplicate list
 	}
-	ArrayList<File> getFileList(File file){
-		ArrayList list = new ArrayList<>();
-		if(file.isFile()){
-			System.out.println(file.getAbsoluteFile().toString());
-			list.add(file);
+	LinkedList getFileList(File file){
+		LinkedList list = new LinkedList();
+		
+		if(file.isFile()){			
+			System.out.println("Is file: " + file.getAbsoluteFile().toString());
+			list.insertf(file);
 		}
 		else if(file.isDirectory()){
 			String[] files = file.list();
 			if(files != null){
 				for(String entry : files){
 					File temp = new File(file, entry);
-					list.addAll(getFileList(temp));
+					list.concat(getFileList(temp));
 				}
 			}
 		}
-		System.gc();
 		return list;
 	}
 	void populateTreeViewAndRemoveExcess(File file){
 		fileList = getFileList(searchDirectory);
-		for(File singleFile : fileList){
+		for(int counter = 0; counter < fileList.size(); counter++){
+			File singleFile = fileList.returna(counter);
 //			System.out.println(singleFile);
 			TreeItem<String> fileItem = new TreeItem<String> (singleFile.getName());
 			ArrayList<String> duplicates = populateList(singleFile, searchDirectory);
