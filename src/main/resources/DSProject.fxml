@@ -12,17 +12,17 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/8.0.76-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dsproject.DSProjectController">
+<GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="756.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dsproject.DSProjectController">
   <columnConstraints>
-    <ColumnConstraints hgrow="SOMETIMES" maxWidth="488.0" minWidth="10.0" percentWidth="73.0" prefWidth="448.0" />
-    <ColumnConstraints hgrow="SOMETIMES" maxWidth="286.0" minWidth="10.0" prefWidth="152.0" />
+    <ColumnConstraints hgrow="SOMETIMES" maxWidth="542.0" minWidth="10.0" percentWidth="20.0" prefWidth="100.0" />
+    <ColumnConstraints hgrow="SOMETIMES" maxWidth="886.0" minWidth="10.0" prefWidth="534.0" />
   </columnConstraints>
   <rowConstraints>
     <RowConstraints maxHeight="361.0" minHeight="10.0" percentHeight="100.0" prefHeight="361.0" vgrow="ALWAYS" />
   </rowConstraints>
    <children>
-      <TreeView fx:id="duplicateList" onMouseClicked="#getSelected" prefHeight="200.0" prefWidth="200.0" />
-      <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1">
+      <TreeView fx:id="duplicateList" onMouseClicked="#getSelected" prefHeight="400.0" prefWidth="559.0" GridPane.columnIndex="1" />
+      <VBox>
          <children>
             <Button fx:id="folderButton" defaultButton="true" mnemonicParsing="false" onAction="#selectFolder" text="Select Search Folder" />
             <Label layoutX="10.0" layoutY="46.0" text="Filters">
@@ -30,9 +30,9 @@
                   <Font size="18.0" />
                </font>
             </Label>
-            <CheckBox fx:id="md5CheckBox" disable="true" mnemonicParsing="false" onMouseClicked="#toggleMD5Filter" text="MD5" />
+            <CheckBox fx:id="md5CheckBox" disable="true" mnemonicParsing="false" onMouseClicked="#toggleMD5Filter" selected="true" text="MD5" />
             <CheckBox fx:id="sizeCheckBox" disable="true" layoutX="10.0" layoutY="31.0" mnemonicParsing="false" onMouseClicked="#toggleSizeFilter" selected="true" text="Size" />
-            <Separator layoutX="10.0" layoutY="154.0" prefWidth="200.0" />
+            <Separator layoutX="10.0" layoutY="154.0" prefHeight="0.0" prefWidth="275.0" />
             <Label text="File Information">
                <font>
                   <Font size="18.0" />

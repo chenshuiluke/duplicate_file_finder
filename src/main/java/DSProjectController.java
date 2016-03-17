@@ -28,7 +28,7 @@ public class DSProjectController {
 	/**************************/
 	private LinkedList fileList = new LinkedList();
 	private File searchDirectory = null;
-	private boolean filterMD5 = false;
+	private boolean filterMD5 = true;
 	private boolean filterSize = true;
 
 
