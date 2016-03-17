@@ -180,6 +180,7 @@ public class DSProjectController {
 				}
 			}
 		}
+		System.gc();
 		return list;
 	}
 	void populateTreeViewAndRemoveExcess(File file){
