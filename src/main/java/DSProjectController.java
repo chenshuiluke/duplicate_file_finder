@@ -54,8 +54,11 @@ public class DSProjectController {
 
     	}
     	catch(java.io.IOException e){
-    		e.printStackTrace();
+    		System.out.println(e.getMessage());
+    		clearList();
+    		populateTreeViewAndRemoveExcess(searchDirectory);
     	}
+
     }
     @FXML
     void removeDuplicateOnClick(ActionEvent event) {
@@ -71,8 +74,11 @@ public class DSProjectController {
 	    	} 		
     	}
     	catch(java.io.IOException e){
-    		e.printStackTrace();
+    		System.out.println(e.getMessage());
+    		clearList();
+    		populateTreeViewAndRemoveExcess(searchDirectory);
     	}
+
 
     }
     @FXML
