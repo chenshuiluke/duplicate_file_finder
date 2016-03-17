@@ -24,8 +24,6 @@ import javafx.collections.ObservableList;
 
 public class DSProjectController {
 
-	//private ArrayList<File> fileList = new ArrayList<>();
-	/**************************/
 	private LinkedList fileList = new LinkedList();
 	private File searchDirectory = null;
 	private boolean filterMD5 = true;
