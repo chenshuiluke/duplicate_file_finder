@@ -35,7 +35,7 @@ public class DSProjectController {
 
 	     	TreeItem<String> treeItem= duplicateList.getSelectionModel().getSelectedItem();
 	     	TreeItem<String> parent = treeItem.getParent();
-	     	if(parent != null){
+	     	if(parent != null && treeItem.getChildren().size() == 0){
 		     	ObservableList<TreeItem<String>> parentChildList = parent.getChildren();
 		     	ArrayList<TreeItem> excess = new ArrayList<>();
 		     	for(TreeItem<String> item : parentChildList){
@@ -64,14 +64,17 @@ public class DSProjectController {
     void removeDuplicateOnClick(ActionEvent event) {
     	try{
 	     	TreeItem<String> treeItem= duplicateList.getSelectionModel().getSelectedItem();
-	    	String name = treeItem.getValue();
-	    	Files.delete(Paths.get(name));
-	    	System.out.println("Deleted " + name);
-	    	TreeItem<String> parent = treeItem.getParent();
-	    	parent.getChildren().remove(treeItem);  
-	    	if(parent.getChildren().size() == 0){
-	    		duplicateList.getRoot().getChildren().remove(parent);
-	    	} 		
+	     	if(treeItem.getChildren().size() == 0){
+		    	String name = treeItem.getValue();
+		    	Files.delete(Paths.get(name));
+		    	System.out.println("Deleted " + name);
+		    	TreeItem<String> parent = treeItem.getParent();
+		    	parent.getChildren().remove(treeItem);  
+		    	if(parent.getChildren().size() == 0 ){
+		    		duplicateList.getRoot().getChildren().remove(parent);
+		    	} 			     		
+	     	}
+
     	}
     	catch(java.io.IOException e){
     		System.out.println(e.getMessage());
