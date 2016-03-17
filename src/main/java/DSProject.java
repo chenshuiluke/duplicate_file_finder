@@ -15,6 +15,8 @@ import java.security.SecureRandom;
 import java.math.BigInteger;
 import java.util.Random;
 import java.util.ArrayList;
+import com.aquafx_project.AquaFx;
+
 
 public class DSProject extends Application{
 	public static void main(String[] args){
@@ -60,6 +62,7 @@ public class DSProject extends Application{
 		}
 	}
 	public void start(Stage primaryStage){
+		AquaFx.style();
 		primaryStage.setTitle("DS Project - Duplicate File Finder");
 		Parent root = null;
 		String sceneFile = "DSProject.fxml";

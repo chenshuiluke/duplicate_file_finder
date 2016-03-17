@@ -10,5 +10,6 @@ repositories {
 
 dependencies{
 	compile group: 'commons-codec', name: 'commons-codec', version: '1.10'
+	compile group: 'com.aquafx-project', name: 'aquafx', version: '0.1'
 }
 
