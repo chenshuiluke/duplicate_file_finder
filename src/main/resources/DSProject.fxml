@@ -3,6 +3,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TreeView?>
 <?import javafx.scene.layout.ColumnConstraints?>
@@ -48,6 +49,8 @@
             <Text fx:id="selectedFileHash" layoutX="10.0" layoutY="151.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Hash:" wrappingWidth="298.4670715332031" />
             <Button fx:id="removeDuplicateButton" disable="true" mnemonicParsing="false" onAction="#removeDuplicateOnClick" prefHeight="26.0" prefWidth="302.0" text="Remove Item" />
             <Button fx:id="removeOtherDuplicatesButton" disable="true" layoutX="10.0" layoutY="183.0" mnemonicParsing="false" onAction="#removeOthersOnClick" prefHeight="26.0" prefWidth="303.0" text="Delete Others" />
+            <ProgressIndicator fx:id="progressIndicator" visible="false" />
+            <Label fx:id="statusText" prefHeight="16.0" prefWidth="302.0" />
          </children>
       </VBox>
    </children>

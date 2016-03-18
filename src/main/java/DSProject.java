@@ -62,7 +62,7 @@ public class DSProject extends Application{
 		}
 	}
 	public void start(Stage primaryStage){
-		AquaFx.style();
+		//AquaFx.style();
 		primaryStage.setTitle("DS Project - Duplicate File Finder");
 		Parent root = null;
 		String sceneFile = "DSProject.fxml";

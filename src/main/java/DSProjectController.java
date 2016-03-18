@@ -21,6 +21,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import javafx.collections.ObservableList;
+import javafx.scene.control.ProgressIndicator;
+import javafx.concurrent.Task;
+import javafx.scene.control.Label;
+import javafx.application.Platform;
+
 
 public class DSProjectController {
 
@@ -29,6 +34,39 @@ public class DSProjectController {
 	private boolean filterMD5 = true;
 	private boolean filterSize = true;
 
+    @FXML
+    private ProgressIndicator progressIndicator;
+
+	Task<Void> returnNewTask(){
+		return new Task<Void>(){
+			@Override
+			protected Void call() throws Exception{
+		        Platform.runLater(new Runnable() {
+		            @Override public void run() {
+		            	progressIndicator.setVisible(true);
+						folderButton.setDisable(true);
+						duplicateList.setDisable(true);
+						sizeCheckBox.setDisable(true);
+						md5CheckBox.setDisable(true);
+						removeOtherDuplicatesButton.setDisable(true);
+						removeDuplicateButton.setDisable(true);
+		            }
+		        });
+				populateTreeViewAndRemoveExcess(searchDirectory);
+        Platform.runLater(new Runnable() {
+            @Override public void run() {
+
+				sizeCheckBox.setDisable(false);
+				md5CheckBox.setDisable(false);
+				progressIndicator.setVisible(false);
+				folderButton.setDisable(false);
+				duplicateList.setDisable(false);
+            }
+        });
+				return null;
+			}
+		};		
+	} 
     @FXML
     void removeOthersOnClick(ActionEvent event) {
     	try{
@@ -56,7 +94,7 @@ public class DSProjectController {
     	catch(java.io.IOException e){
     		System.out.println(e.getMessage());
     		clearList();
-    		populateTreeViewAndRemoveExcess(searchDirectory);
+    		(new Thread(returnNewTask())).start();
     	}
 
     }
@@ -79,7 +117,7 @@ public class DSProjectController {
     	catch(java.io.IOException e){
     		System.out.println(e.getMessage());
     		clearList();
-    		populateTreeViewAndRemoveExcess(searchDirectory);
+    		(new Thread(returnNewTask())).start();
     	}
 
 
@@ -107,21 +145,21 @@ public class DSProjectController {
     void toggleMD5Filter() {
 		filterMD5 = !filterMD5;
 		clearList();
-		populateTreeViewAndRemoveExcess(searchDirectory);
+		(new Thread(returnNewTask())).start();
     }
 
     @FXML
     void toggleSizeFilter() {
 		filterSize = !filterSize;
 		clearList();
-		populateTreeViewAndRemoveExcess(searchDirectory);
+		(new Thread(returnNewTask())).start();
     }
 
 
     @FXML
     private Button folderButton;
     @FXML
-    private Text statusText;
+    private Label statusText;
 
     @FXML
     private ResourceBundle resources;
@@ -131,6 +169,7 @@ public class DSProjectController {
 
     @FXML
     private TreeView<String> duplicateList;
+
 
     @FXML
     void getSelected(){
@@ -179,6 +218,7 @@ public class DSProjectController {
 		if(file.isFile()){			
 			System.out.println("Is file: " + file.getAbsoluteFile().toString());
 			list.insertf(file);
+
 		}
 		else if(file.isDirectory()){
 			String[] files = file.list();
@@ -193,6 +233,9 @@ public class DSProjectController {
 		return list;
 	}
 	void populateTreeViewAndRemoveExcess(File file){
+
+
+
 		fileList = getFileList(searchDirectory);
 		for(int counter = 0; counter < fileList.size(); counter++){
 			File singleFile = fileList.returna(counter);
@@ -201,6 +244,7 @@ public class DSProjectController {
 			ArrayList<String> duplicates = populateList(singleFile, searchDirectory);
 			for(String duplicate : duplicates){
 				TreeItem<String> item = new TreeItem<String>(duplicate);
+
 				fileItem.getChildren().add(item);
 			}
 			if(fileItem.getChildren().size() > 0){
@@ -210,9 +254,11 @@ public class DSProjectController {
 		}
 		ArrayList<TreeItem> excess = new ArrayList<>();
 		ObservableList<TreeItem<String>> nodeList= duplicateList.getRoot().getChildren();
+
 		for(int counter1 = 0; counter1 < nodeList.size(); counter1++){
 			if(nodeList.get(counter1).getChildren().size() < 1){
 					excess.add(nodeList.get(counter1));
+
 					continue;
 			}
 			for(int counter2 = counter1+1; counter2 < nodeList.size(); counter2++){
@@ -223,19 +269,22 @@ public class DSProjectController {
 			}
 		}
 		nodeList.removeAll(excess);
+
 		System.gc();
 	}
     @FXML
     void selectFolder(ActionEvent event) {
 		DirectoryChooser chooser = new DirectoryChooser();
 		chooser.setTitle("Choose Directory");
-		File directory = chooser.showDialog(null);
+		File directory = chooser.showDialog(sizeCheckBox.getScene().getWindow());
 		if(directory != null){
+			
 			searchDirectory = directory; 
 			clearList();
-			populateTreeViewAndRemoveExcess(searchDirectory);
-			sizeCheckBox.setDisable(false);
-			md5CheckBox.setDisable(false);
+
+
+			(new Thread(returnNewTask())).start();
+
 			System.gc();
 		}
 	}
