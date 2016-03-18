@@ -25,7 +25,7 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.concurrent.Task;
 import javafx.scene.control.Label;
 import javafx.application.Platform;
-
+import javafx.scene.control.TextArea;
 
 public class DSProjectController {
 
@@ -33,6 +33,9 @@ public class DSProjectController {
 	private File searchDirectory = null;
 	private boolean filterMD5 = true;
 	private boolean filterSize = true;
+
+    @FXML
+    private TextArea statusText;
 
     @FXML
     private ProgressIndicator progressIndicator;
@@ -82,6 +85,7 @@ public class DSProjectController {
 						excess.add(item);	     			
 		     		}
 		     	}
+		     	printToStatus("Deleting copies of " + treeItem.getValue());
 		     	for(TreeItem<String> excessItem : excess){
 		     			String name = excessItem.getValue();
 		     			Files.delete(Paths.get(name));
@@ -107,8 +111,10 @@ public class DSProjectController {
 		    	Files.delete(Paths.get(name));
 		    	System.out.println("Deleted " + name);
 		    	TreeItem<String> parent = treeItem.getParent();
+		    	printToStatus("Deleting " + treeItem.getValue());
 		    	parent.getChildren().remove(treeItem);  
 		    	if(parent.getChildren().size() == 0 ){
+		    		printToStatus("Deleting parent item " + parent.getValue() + " because it has no more copies.");
 		    		duplicateList.getRoot().getChildren().remove(parent);
 		    	} 			     		
 	     	}
@@ -143,6 +149,7 @@ public class DSProjectController {
 
     @FXML
     void toggleMD5Filter() {
+    	printToStatus("Toggling MD5 filter.");
 		filterMD5 = !filterMD5;
 		clearList();
 		(new Thread(returnNewTask())).start();
@@ -150,6 +157,7 @@ public class DSProjectController {
 
     @FXML
     void toggleSizeFilter() {
+     	printToStatus("Toggling Size filter.");
 		filterSize = !filterSize;
 		clearList();
 		(new Thread(returnNewTask())).start();
@@ -158,8 +166,6 @@ public class DSProjectController {
 
     @FXML
     private Button folderButton;
-    @FXML
-    private Label statusText;
 
     @FXML
     private ResourceBundle resources;
@@ -232,11 +238,18 @@ public class DSProjectController {
 		System.gc();
 		return list;
 	}
+	void printToStatus(String input){
+        Platform.runLater(new Runnable() {
+            @Override public void run() {
+            	statusText.appendText(input + System.getProperty("line.separator"));
+            }
+        });		
+	}
 	void populateTreeViewAndRemoveExcess(File file){
 
-
-
+		printToStatus("Getting file list.");
 		fileList = getFileList(searchDirectory);
+		printToStatus("Populating tree view.");
 		for(int counter = 0; counter < fileList.size(); counter++){
 			File singleFile = fileList.returna(counter);
 //			System.out.println(singleFile);
@@ -254,7 +267,7 @@ public class DSProjectController {
 		}
 		ArrayList<TreeItem> excess = new ArrayList<>();
 		ObservableList<TreeItem<String>> nodeList= duplicateList.getRoot().getChildren();
-
+		printToStatus("Removing excess nodes.");
 		for(int counter1 = 0; counter1 < nodeList.size(); counter1++){
 			if(nodeList.get(counter1).getChildren().size() < 1){
 					excess.add(nodeList.get(counter1));
@@ -268,6 +281,7 @@ public class DSProjectController {
 				}
 			}
 		}
+
 		nodeList.removeAll(excess);
 
 		System.gc();
