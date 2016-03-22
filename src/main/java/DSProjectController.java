@@ -26,6 +26,8 @@ import javafx.concurrent.Task;
 import javafx.scene.control.Label;
 import javafx.application.Platform;
 import javafx.scene.control.TextArea;
+import javafx.scene.layout.HBox;
+import javafx.scene.control.TextField;
 
 public class DSProjectController {
 
@@ -33,13 +35,25 @@ public class DSProjectController {
 	private File searchDirectory = null;
 	private boolean filterMD5 = true;
 	private boolean filterSize = true;
-
+	private boolean filterExtension = false;
+	@FXML
+    private Button applyFilterButton;
+	
     @FXML
     private TextArea statusText;
 
     @FXML
     private ProgressIndicator progressIndicator;
 
+    @FXML
+    private HBox extensionFilterHBox;
+	
+    @FXML
+    void toggleExtensionFilter() {
+		filterExtension = !filterExtension;
+    }
+	
+	
 	Task<Void> returnNewTask(){
 		return new Task<Void>(){
 			@Override
@@ -51,6 +65,8 @@ public class DSProjectController {
 						duplicateList.setDisable(true);
 						sizeCheckBox.setDisable(true);
 						md5CheckBox.setDisable(true);
+						extensionFilterHBox.setDisable(true);
+						applyFilterButton.setDisable(true);
 						removeOtherDuplicatesButton.setDisable(true);
 						removeDuplicateButton.setDisable(true);
 		            }
@@ -61,9 +77,11 @@ public class DSProjectController {
 
 				sizeCheckBox.setDisable(false);
 				md5CheckBox.setDisable(false);
+				applyFilterButton.setDisable(false);
 				progressIndicator.setVisible(false);
 				folderButton.setDisable(false);
 				duplicateList.setDisable(false);
+				extensionFilterHBox.setDisable(false);
             }
         });
 				return null;
@@ -147,22 +165,27 @@ public class DSProjectController {
     @FXML
     private Text selectedFileHash;
 
+	@FXML
+    private TextField extensionFilterTextBox;
     @FXML
     void toggleMD5Filter() {
     	printToStatus("Toggling MD5 filter.");
 		filterMD5 = !filterMD5;
 		clearList();
-		(new Thread(returnNewTask())).start();
     }
 
     @FXML
     void toggleSizeFilter() {
      	printToStatus("Toggling Size filter.");
 		filterSize = !filterSize;
+    }
+
+	
+    @FXML
+    void applyFilter() {
 		clearList();
 		(new Thread(returnNewTask())).start();
     }
-
 
     @FXML
     private Button folderButton;
@@ -221,10 +244,22 @@ public class DSProjectController {
 	LinkedList getFileList(File file){
 		LinkedList list = new LinkedList();
 		
-		if(file.isFile()){			
+		if(file.isFile()){	
+			if(filterExtension && extensionFilterTextBox.getText().length() > 0){
+				String fileName = file.getAbsoluteFile().toString();
+				System.out.println("Trying to filter: " + fileName);
+				String filter = extensionFilterTextBox.getText();
+				
+				String lastPartOfFileName = fileName.substring(fileName.length() - filter.length(), fileName.length());
+			
+				if(!filter.equals(lastPartOfFileName)){ //trtr.doc doc filter
+					System.out.println("Excluding " + fileName);
+					return list;
+				}
+			}
+
 			System.out.println("Is file: " + file.getAbsoluteFile().toString());
 			list.insertf(file);
-
 		}
 		else if(file.isDirectory()){
 			String[] files = file.list();
@@ -253,11 +288,11 @@ public class DSProjectController {
 		for(int counter = 0; counter < fileList.size(); counter++){
 			File singleFile = fileList.returna(counter);
 //			System.out.println(singleFile);
-			TreeItem<String> fileItem = new TreeItem<String> (singleFile.getName());
+			TreeItem<String> fileItem = new TreeItem<String> (singleFile.getAbsolutePath());
 			ArrayList<String> duplicates = populateList(singleFile, searchDirectory);
 			for(String duplicate : duplicates){
-				TreeItem<String> item = new TreeItem<String>(duplicate);
 
+				TreeItem<String> item = new TreeItem<String>(duplicate);
 				fileItem.getChildren().add(item);
 			}
 			if(fileItem.getChildren().size() > 0){
@@ -275,7 +310,10 @@ public class DSProjectController {
 					continue;
 			}
 			for(int counter2 = counter1+1; counter2 < nodeList.size(); counter2++){
-				if(nodeList.get(counter2).getValue().equals(nodeList.get(counter1).getValue())){
+				File first = new File(nodeList.get(counter1).getValue());
+				File second = new File(nodeList.get(counter2).getValue());
+				
+				if(verifyMD5(first, second) || nodeList.get(counter2).getValue().equals(nodeList.get(counter1).getValue())){
 //					System.out.println("equals");
 					excess.add(nodeList.get(counter2));
 				}
@@ -283,7 +321,7 @@ public class DSProjectController {
 		}
 
 		nodeList.removeAll(excess);
-
+		printToStatus("Done!");
 		System.gc();
 	}
     @FXML
@@ -313,24 +351,33 @@ public class DSProjectController {
 		ArrayList<String> list = new ArrayList<>();
 		if(file.isFile()){
 			if(!isAbsoluteFilePathEqual(origin, file)){
-				if(filterSize && filterMD5){
-					if(file.length() == origin.length() && verifyMD5(origin, file)){
-						list.add(file.getAbsoluteFile().toString());
+				//System.out.println("Verifying " + file.getName());
+				//printToStatus("Verifying " + file.getName());
+				if(filterSize){
+					if(!(file.length() == origin.length())){
+						return list;
 					}
 				}
-				else if(filterSize){
-					if(file.length() == origin.length()){
-						list.add(file.getAbsoluteFile().toString());
+				if(filterMD5){
+					if(!verifyMD5(origin, file)){
+						return list;
 					}
 				}
-				else if(filterMD5){
-					if(verifyMD5(origin, file)){
-						list.add(file.getAbsoluteFile().toString());
+				if(filterExtension && extensionFilterTextBox.getText().length() > 0){
+					String fileName = file.getAbsoluteFile().toString();
+					System.out.println("Trying to filter: " + fileName);
+					String filter = extensionFilterTextBox.getText();
+					
+					String lastPartOfFileName = fileName.substring(fileName.length() - filter.length(), fileName.length());
+				
+					if(!filter.equals(lastPartOfFileName)){ //trtr.doc doc filter
+						System.out.println("Excluding " + fileName);
+						return list;
 					}
 				}
-				else{
-						list.add(file.getAbsoluteFile().toString());
-				}
+				//System.out.println("Adding " + file.getName());
+				//printToStatus("Adding " + file.getName());
+				list.add(file.getAbsoluteFile().toString());				
 			}
 			
 		}

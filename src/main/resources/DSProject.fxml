@@ -6,27 +6,29 @@
 <?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TreeView?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="756.0" xmlns="http://javafx.com/javafx/8.0.76-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dsproject.DSProjectController">
+<GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="756.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dsproject.DSProjectController">
   <columnConstraints>
-    <ColumnConstraints hgrow="SOMETIMES" maxWidth="542.0" minWidth="10.0" percentWidth="40.0" prefWidth="100.0" />
-    <ColumnConstraints hgrow="SOMETIMES" maxWidth="886.0" minWidth="10.0" prefWidth="534.0" />
+    <ColumnConstraints hgrow="SOMETIMES" maxWidth="542.0" minWidth="10.0" prefWidth="196.0" />
+    <ColumnConstraints hgrow="SOMETIMES" maxWidth="886.0" minWidth="10.0" prefWidth="410.0" />
+      <ColumnConstraints hgrow="SOMETIMES" maxWidth="886.0" minWidth="10.0" prefWidth="197.0" />
   </columnConstraints>
   <rowConstraints>
     <RowConstraints maxHeight="361.0" minHeight="10.0" percentHeight="100.0" prefHeight="361.0" vgrow="ALWAYS" />
   </rowConstraints>
    <children>
-      <TreeView fx:id="duplicateList" onMouseClicked="#getSelected" prefHeight="400.0" prefWidth="559.0" GridPane.columnIndex="1" />
+      <TreeView fx:id="duplicateList" onMouseClicked="#getSelected" prefHeight="400.0" prefWidth="317.0" GridPane.columnIndex="1" />
       <VBox prefHeight="400.0" prefWidth="147.0">
          <children>
-            <Button fx:id="folderButton" defaultButton="true" mnemonicParsing="false" onAction="#selectFolder" prefHeight="26.0" prefWidth="305.0" text="Select Search Folder" />
             <Label layoutX="10.0" layoutY="46.0" text="Filters">
                <font>
                   <Font size="18.0" />
@@ -34,20 +36,15 @@
             </Label>
             <CheckBox fx:id="md5CheckBox" disable="true" mnemonicParsing="false" onMouseClicked="#toggleMD5Filter" selected="true" text="MD5" />
             <CheckBox fx:id="sizeCheckBox" disable="true" layoutX="10.0" layoutY="31.0" mnemonicParsing="false" onMouseClicked="#toggleSizeFilter" selected="true" text="Size" />
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Extension Filter" />
+            <HBox fx:id="extensionFilterHBox" disable="true" prefHeight="100.0" prefWidth="200.0">
+               <children>
+                  <CheckBox mnemonicParsing="false" onAction="#toggleExtensionFilter" />
+                  <TextField fx:id="extensionFilterTextBox" prefHeight="25.0" prefWidth="157.0" />
+               </children>
+            </HBox>
+            <Button fx:id="applyFilterButton" disable="true" mnemonicParsing="false" onAction="#applyFilter" text="Apply" />
             <Separator prefWidth="200.0" />
-            <Label text="File Information">
-               <font>
-                  <Font size="18.0" />
-               </font>
-            </Label>
-            <Text layoutX="10.0" layoutY="102.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Selected" wrappingWidth="148.39617919921875">
-               <font>
-                  <Font size="15.0" />
-               </font>
-            </Text>
-            <Text fx:id="selectedFileName" layoutX="10.0" layoutY="119.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Name:" wrappingWidth="145.39617919921875" />
-            <Text fx:id="selectedFileSize" layoutX="10.0" layoutY="135.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Size:" wrappingWidth="148.39877319335938" />
-            <Text fx:id="selectedFileHash" layoutX="10.0" layoutY="151.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Hash:" wrappingWidth="298.4670715332031" />
             <Button fx:id="removeDuplicateButton" alignment="TOP_LEFT" disable="true" mnemonicParsing="false" onAction="#removeDuplicateOnClick" prefHeight="26.0" prefWidth="302.0" text="Remove Item" />
             <Button fx:id="removeOtherDuplicatesButton" alignment="TOP_LEFT" disable="true" layoutX="10.0" layoutY="183.0" mnemonicParsing="false" onAction="#removeOthersOnClick" prefHeight="26.0" prefWidth="303.0" text="Remove All Other Items" wrapText="true" />
             <Label text="Logs">
@@ -56,7 +53,25 @@
                </font>
             </Label>
             <TextArea fx:id="statusText" editable="false" prefHeight="94.0" prefWidth="302.0" />
+            <Button fx:id="folderButton" defaultButton="true" mnemonicParsing="false" onAction="#selectFolder" prefHeight="26.0" prefWidth="305.0" text="Select Search Folder" />
             <ProgressIndicator fx:id="progressIndicator" visible="false" />
+         </children>
+      </VBox>
+      <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2">
+         <children>
+            <Label text="File Information">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Label>
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Selected" wrappingWidth="148.39617919921875">
+               <font>
+                  <Font size="15.0" />
+               </font>
+            </Text>
+            <Text fx:id="selectedFileName" strokeType="OUTSIDE" strokeWidth="0.0" text="Name:" wrappingWidth="145.39617919921875" />
+            <Text fx:id="selectedFileSize" strokeType="OUTSIDE" strokeWidth="0.0" text="Size:" wrappingWidth="148.39877319335938" />
+            <Text fx:id="selectedFileHash" strokeType="OUTSIDE" strokeWidth="0.0" text="Hash:" wrappingWidth="298.4670715332031" />
          </children>
       </VBox>
    </children>
