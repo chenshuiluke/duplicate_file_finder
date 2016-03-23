@@ -28,6 +28,7 @@ import javafx.application.Platform;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
 import javafx.scene.control.TextField;
+import java.util.HashSet;
 
 public class DSProjectController {
 
@@ -285,42 +286,36 @@ public class DSProjectController {
 		printToStatus("Getting file list.");
 		fileList = getFileList(searchDirectory);
 		printToStatus("Populating tree view.");
+		HashSet<String> nodeCopyList = new HashSet<>();
+		//A list of all nodes that were previously added to the tree
+		/*
+			offers constant time performance for the basic operations 
+			(add, remove, contains and size).
+			So checking for extras is generally 0(1)
+		*/
 		for(int counter = 0; counter < fileList.size(); counter++){
+
 			File singleFile = fileList.returna(counter);
+			if(nodeCopyList.add(singleFile.getName()) == false){ //If the item doesn't already exist
+				continue;
+			}
 //			System.out.println(singleFile);
 			TreeItem<String> fileItem = new TreeItem<String> (singleFile.getAbsolutePath());
-			ArrayList<String> duplicates = populateList(singleFile, searchDirectory);
+			
+			/*ArrayList<String> duplicates = */
+			populateList(singleFile, searchDirectory, fileItem, nodeCopyList);
+			/*
 			for(String duplicate : duplicates){
 
 				TreeItem<String> item = new TreeItem<String>(duplicate);
 				fileItem.getChildren().add(item);
 			}
+			*/
 			if(fileItem.getChildren().size() > 0){
 				fileItem.getChildren().add(new TreeItem<String>(singleFile.getAbsoluteFile().toString()));
-			}
-			duplicateList.getRoot().getChildren().add(fileItem);
+				duplicateList.getRoot().getChildren().add(fileItem);			}
+			
 		}
-		ArrayList<TreeItem> excess = new ArrayList<>();
-		ObservableList<TreeItem<String>> nodeList= duplicateList.getRoot().getChildren();
-		printToStatus("Removing excess nodes.");
-		for(int counter1 = 0; counter1 < nodeList.size(); counter1++){
-			if(nodeList.get(counter1).getChildren().size() < 1){
-					excess.add(nodeList.get(counter1));
-
-					continue;
-			}
-			for(int counter2 = counter1+1; counter2 < nodeList.size(); counter2++){
-				File first = new File(nodeList.get(counter1).getValue());
-				File second = new File(nodeList.get(counter2).getValue());
-				
-				if(verifyMD5(first, second) || nodeList.get(counter2).getValue().equals(nodeList.get(counter1).getValue())){
-//					System.out.println("equals");
-					excess.add(nodeList.get(counter2));
-				}
-			}
-		}
-
-		nodeList.removeAll(excess);
 		printToStatus("Done!");
 		System.gc();
 	}
@@ -346,21 +341,21 @@ public class DSProjectController {
 	boolean isAbsoluteFilePathEqual(File origin, File file){
 		return file.getAbsoluteFile().toString().equals(origin.getAbsoluteFile().toString());
 	}
-	ArrayList<String> populateList(File origin, File file){
+	void populateList(File origin, File file, TreeItem<String> node, HashSet<String> nodeList){
 		//add file only
-		ArrayList<String> list = new ArrayList<>();
+		//ArrayList<String> list = new ArrayList<>();
 		if(file.isFile()){
 			if(!isAbsoluteFilePathEqual(origin, file)){
 				//System.out.println("Verifying " + file.getName());
 				//printToStatus("Verifying " + file.getName());
 				if(filterSize){
 					if(!(file.length() == origin.length())){
-						return list;
+						return;
 					}
 				}
 				if(filterMD5){
 					if(!verifyMD5(origin, file)){
-						return list;
+						return;
 					}
 				}
 				if(filterExtension && extensionFilterTextBox.getText().length() > 0){
@@ -372,12 +367,17 @@ public class DSProjectController {
 				
 					if(!filter.equals(lastPartOfFileName)){ //trtr.doc doc filter
 						System.out.println("Excluding " + fileName);
-						return list;
+						return;
 					}
 				}
 				//System.out.println("Adding " + file.getName());
 				//printToStatus("Adding " + file.getName());
-				list.add(file.getAbsoluteFile().toString());				
+				TreeItem<String> newTreeItem = new TreeItem<>(file.getAbsolutePath());
+
+				
+				node.getChildren().add(newTreeItem);
+				
+				
 			}
 			
 		}
@@ -386,12 +386,11 @@ public class DSProjectController {
 			if(subNote != null){
 				for(String filename : subNote){
 					File temp = new File(file, filename);
-					ArrayList subFiles = populateList(origin, temp);
-					list.addAll(subFiles);
+					populateList(origin, temp, node, nodeList);
+					
 				}
 			}
 		}
-		return list;
 	}
     @FXML
     void initialize() {
