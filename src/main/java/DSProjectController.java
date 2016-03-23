@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import javafx.collections.ObservableList;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
 import javafx.concurrent.Task;
 import javafx.scene.control.Label;
@@ -29,14 +30,19 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
 import javafx.scene.control.TextField;
 import java.util.HashSet;
-
+import java.util.HashMap;
+import java.util.concurrent.CountDownLatch;
+import org.apache.commons.io.comparator.SizeFileComparator;
+import org.apache.commons.io.FilenameUtils;
+import com.google.common.collect.HashBiMap;
 public class DSProjectController {
 
 	private LinkedList fileList = new LinkedList();
 	private File searchDirectory = null;
 	private boolean filterMD5 = true;
-	private boolean filterSize = true;
+	private boolean filterSize = false;
 	private boolean filterExtension = false;
+	private HashBiMap<String, String> fileNameToMD5HashMap = HashBiMap.create();
 	@FXML
     private Button applyFilterButton;
 	
@@ -44,11 +50,13 @@ public class DSProjectController {
     private TextArea statusText;
 
     @FXML
-    private ProgressIndicator progressIndicator;
+    private ProgressBar progressBarIndicator;
 
     @FXML
     private HBox extensionFilterHBox;
-	
+
+    @FXML
+    private ProgressIndicator hashBar;	
     @FXML
     void toggleExtensionFilter() {
 		filterExtension = !filterExtension;
@@ -61,12 +69,9 @@ public class DSProjectController {
 			protected Void call() throws Exception{
 		        Platform.runLater(new Runnable() {
 		            @Override public void run() {
-		            	progressIndicator.setVisible(true);
+		            	progressBarIndicator.setVisible(true);
 						folderButton.setDisable(true);
 						duplicateList.setDisable(true);
-						sizeCheckBox.setDisable(true);
-						md5CheckBox.setDisable(true);
-						extensionFilterHBox.setDisable(true);
 						applyFilterButton.setDisable(true);
 						removeOtherDuplicatesButton.setDisable(true);
 						removeDuplicateButton.setDisable(true);
@@ -75,14 +80,9 @@ public class DSProjectController {
 				populateTreeViewAndRemoveExcess(searchDirectory);
         Platform.runLater(new Runnable() {
             @Override public void run() {
-
-				sizeCheckBox.setDisable(false);
-				md5CheckBox.setDisable(false);
-				applyFilterButton.setDisable(false);
-				progressIndicator.setVisible(false);
+				progressBarIndicator.setVisible(false);
 				folderButton.setDisable(false);
 				duplicateList.setDisable(false);
-				extensionFilterHBox.setDisable(false);
             }
         });
 				return null;
@@ -120,6 +120,13 @@ public class DSProjectController {
     		(new Thread(returnNewTask())).start();
     	}
 
+    }
+    private void toggleHashProgressBar(){
+    	Platform.runLater(new Runnable(){
+    		@Override public void run(){
+    			hashBar.setVisible(!hashBar.isVisible());
+    		}
+    	});
     }
     @FXML
     void removeDuplicateOnClick(ActionEvent event) {
@@ -184,8 +191,10 @@ public class DSProjectController {
 	
     @FXML
     void applyFilter() {
-		clearList();
-		(new Thread(returnNewTask())).start();
+    	if(searchDirectory != null){
+	  		clearList();
+			(new Thread(returnNewTask())).start();  		
+    	}
     }
 
     @FXML
@@ -230,9 +239,25 @@ public class DSProjectController {
 	private String getMD5(File file){
 		String md5 = "";
 		try{
-			FileInputStream fis = new FileInputStream(file);
-			md5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
-			fis.close();
+			
+			String temp = fileNameToMD5HashMap.get(file.getAbsolutePath());
+			if(temp == null){
+				toggleHashProgressBar();
+				FileInputStream fis = new FileInputStream(file);
+				System.out.println("Hashing " + file.getAbsolutePath());
+				if(file.length() > 104857600)
+					printToStatus("Hashing an EXTREMELY large file. This could take a rather long time: " + file.getAbsolutePath());
+				if(file.length() > 52428800 && file.length() < 104857600)
+					printToStatus("Hashing a somewhat large file. This might take a little while: " + file.getAbsolutePath());
+				md5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
+				fileNameToMD5HashMap.put(file.getAbsolutePath(), md5);
+				fis.close();
+				toggleHashProgressBar();
+			}
+			else{
+				md5 = temp;
+			}		
+			
 		}
 		catch(java.io.IOException i_exc){
 			i_exc.printStackTrace();
@@ -274,6 +299,7 @@ public class DSProjectController {
 		System.gc();
 		return list;
 	}
+
 	void printToStatus(String input){
         Platform.runLater(new Runnable() {
             @Override public void run() {
@@ -286,6 +312,9 @@ public class DSProjectController {
 		printToStatus("Getting file list.");
 		fileList = getFileList(searchDirectory);
 		printToStatus("Populating tree view.");
+		if(filterMD5){
+			printToStatus("May not appear to move at start because all files will be hashed at the start");
+		}
 		HashSet<String> nodeCopyList = new HashSet<>();
 		//A list of all nodes that were previously added to the tree
 		/*
@@ -293,39 +322,58 @@ public class DSProjectController {
 			(add, remove, contains and size).
 			So checking for extras is generally 0(1)
 		*/
+		HashSet<String> nodeCopyListHashes = new HashSet<>();
 		for(int counter = 0; counter < fileList.size(); counter++){
-			final float progress = counter;
-
+			final float progress = counter; //final because its required
+	        Platform.runLater(new Runnable() {
+	        	/*
+					If I don't use runAndWait instead of Platform.runLater 
+					the program will lag for a loong time even after the duplicates are found
+					because of the pending UI changes, so this makes it run and wait until the progress ui is changed.
+	        	*/
+	            @Override public void run() {
+	            	progressBarIndicator.setProgress((progress / fileList.size()));
+	            }
+	        });	      
 			File singleFile = fileList.returna(counter);
-			if(nodeCopyList.add(singleFile.getName()) == false){ //If the item doesn't already exist
+			if(nodeCopyList.add(singleFile.getAbsolutePath()) == false){ //If the item doesn't already exist
+				System.out.println("Excluding " + singleFile.getName());
 				continue;
 			}
-	        Platform.runLater(new Runnable() {
-	            @Override public void run() {
-	            	progressIndicator.setProgress((progress / fileList.size()));
-	            }
-	        });	        
 
 //			System.out.println(singleFile);
 			TreeItem<String> fileItem = new TreeItem<String> (singleFile.getAbsolutePath());
-			
-			/*ArrayList<String> duplicates = */
-			populateList(singleFile, searchDirectory, fileItem, nodeCopyList);
-			/*
-			for(String duplicate : duplicates){
+			//Kinda like the direct sub folder after the Root node called "Duplicates"
 
-				TreeItem<String> item = new TreeItem<String>(duplicate);
-				fileItem.getChildren().add(item);
+			populateList(singleFile, searchDirectory, fileItem, nodeCopyList);
+			if(filterMD5){
+				if(fileNameToMD5HashMap.inverse().get(getMD5(singleFile)) != null){ //
+					continue;
+				}	
+				else{
+					nodeCopyListHashes.add(getMD5(singleFile));
+					/*
+						Won't require rehashing in the getMd5 function, because, for each file hashed,
+						said getMD5 function adds the file's absolute path and its hash to a global HashMap.
+						This means it won't need to rehash the file if a hash for the file exists in the map.
+					*/
+				}			
 			}
-			*/
+
 			if(fileItem.getChildren().size() > 0){
+				System.out.println("Adding " + singleFile.getName());
 				fileItem.getChildren().add(new TreeItem<String>(singleFile.getAbsoluteFile().toString()));
-				duplicateList.getRoot().getChildren().add(fileItem);			}
+				Platform.runLater(new Runnable(){
+					@Override public void run() {
+						duplicateList.getRoot().getChildren().add(fileItem);
+					}
+				});
+			}
 			
 		}
         Platform.runLater(new Runnable() {
             @Override public void run() {
-            	progressIndicator.setProgress(-1);
+            	progressBarIndicator.setProgress(-1);
             }
         });
 		printToStatus("Done!");
@@ -353,20 +401,25 @@ public class DSProjectController {
 	boolean isAbsoluteFilePathEqual(File origin, File file){
 		return file.getAbsoluteFile().toString().equals(origin.getAbsoluteFile().toString());
 	}
-	void populateList(File origin, File file, TreeItem<String> node, HashSet<String> nodeList){
+	void populateList(File original, File file, TreeItem<String> node, HashSet<String> nodeList){
 		//add file only
 		//ArrayList<String> list = new ArrayList<>();
 		if(file.isFile()){
-			if(!isAbsoluteFilePathEqual(origin, file)){
+			if(!isAbsoluteFilePathEqual(original, file)){
 				//System.out.println("Verifying " + file.getName());
 				//printToStatus("Verifying " + file.getName());
-				if(filterSize){
-					if(!(file.length() == origin.length())){
+
+				if(filterSize){ 
+					/*
+					Files need to be of the same size to have the same hashes, so this filter weeds out the majority 
+					of all duplicate candidates before a hash even needs to be calculated 
+					*/
+					if(!(file.length() == original.length())){
 						return;
 					}
 				}
 				if(filterMD5){
-					if(!verifyMD5(origin, file)){
+					if(!verifyMD5(original, file)){
 						return;
 					}
 				}
@@ -398,7 +451,7 @@ public class DSProjectController {
 			if(subNote != null){
 				for(String filename : subNote){
 					File temp = new File(file, filename);
-					populateList(origin, temp, node, nodeList);
+					populateList(original, temp, node, nodeList);
 					
 				}
 			}
@@ -410,7 +463,5 @@ public class DSProjectController {
 		TreeItem<String> rootItem = new TreeItem<String> ("Duplicates");
 		rootItem.setExpanded(true);
 		duplicateList.setRoot(rootItem);
-		
-
     }
 }
