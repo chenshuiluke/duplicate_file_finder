@@ -294,11 +294,18 @@ public class DSProjectController {
 			So checking for extras is generally 0(1)
 		*/
 		for(int counter = 0; counter < fileList.size(); counter++){
+			final float progress = counter;
 
 			File singleFile = fileList.returna(counter);
 			if(nodeCopyList.add(singleFile.getName()) == false){ //If the item doesn't already exist
 				continue;
 			}
+	        Platform.runLater(new Runnable() {
+	            @Override public void run() {
+	            	progressIndicator.setProgress((progress /nodeCopyList.size()));
+	            }
+	        });	        
+
 //			System.out.println(singleFile);
 			TreeItem<String> fileItem = new TreeItem<String> (singleFile.getAbsolutePath());
 			
@@ -316,6 +323,11 @@ public class DSProjectController {
 				duplicateList.getRoot().getChildren().add(fileItem);			}
 			
 		}
+        Platform.runLater(new Runnable() {
+            @Override public void run() {
+            	progressIndicator.setProgress(-1);
+            }
+        });
 		printToStatus("Done!");
 		System.gc();
 	}
