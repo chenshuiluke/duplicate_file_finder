@@ -302,7 +302,7 @@ public class DSProjectController {
 			}
 	        Platform.runLater(new Runnable() {
 	            @Override public void run() {
-	            	progressIndicator.setProgress((progress /nodeCopyList.size()));
+	            	progressIndicator.setProgress((progress / fileList.size()));
 	            }
 	        });	        
 
