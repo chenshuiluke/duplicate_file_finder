@@ -248,7 +248,7 @@ public class DSProjectController {
 		String md5 = "";
 		try{
 			if(!hashLargeMD5Files){
-				if(file.length() > 10485760){
+				if(file.length() > 104857600){
 					return file.getAbsolutePath();
 				}
 			}
@@ -257,7 +257,7 @@ public class DSProjectController {
 				toggleHashProgressBar();
 				
 				System.out.println("Hashing " + file.getAbsolutePath());
-				if(file.length() > 104857600)
+				if(file.length() > 1073741824)
 					printToStatus("Hashing an EXTREMELY large file. This could take a rather long time: " + file.getAbsolutePath());
 				if(file.length() > 52428800 && file.length() < 104857600)
 					printToStatus("Hashing a somewhat large file. This might take a little while: " + file.getAbsolutePath());
