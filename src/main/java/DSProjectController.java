@@ -254,7 +254,7 @@ public class DSProjectController {
 			}
 			String temp = fileNameToMD5HashMap.get(file.getAbsolutePath());
 			if(temp == null){
-				//toggleHashProgressBar();
+				toggleHashProgressBar();
 				
 				System.out.println("Hashing " + file.getAbsolutePath());
 				if(file.length() > 104857600)
@@ -265,7 +265,7 @@ public class DSProjectController {
 				HashCode hashCode = com.google.common.io.Files.hash(file, Hashing.md5());
 				md5 = hashCode.toString();
 				fileNameToMD5HashMap.put(file.getAbsolutePath(), md5);
-				// toggleHashProgressBar();
+				toggleHashProgressBar();
 			}
 			else{
 				md5 = temp;
@@ -335,7 +335,7 @@ public class DSProjectController {
 			(add, remove, contains and size).
 			So checking for extras is generally 0(1)
 		*/
-		HashSet<String> nodeCopyListHashes = new HashSet<>();
+		HashBiMap<String, String> nodeCopyListHashes = HashBiMap.create();
 		for(int counter = 0; counter < fileList.size(); counter++){
 			final float progress = counter; //final because its required
 	        Platform.runLater(new Runnable() {
@@ -359,13 +359,13 @@ public class DSProjectController {
 			//Kinda like the direct sub folder after the Root node called "Duplicates"
 
 			populateList(singleFile, searchDirectory, fileItem, nodeCopyList);
-			/*
+			
 			if(filterMD5){
-				if(fileNameToMD5HashMap.inverse().get(getMD5(singleFile)) != null){ //
+				if(nodeCopyListHashes.inverse().get(getMD5(singleFile)) != null){ //
 					continue;
 				}	
 				else{
-					nodeCopyListHashes.add(getMD5(singleFile));
+					nodeCopyListHashes.put(getMD5(singleFile), singleFile.getAbsolutePath());
 					
 					//	Won't require rehashing in the getMd5 function, because, for each file hashed,
 					//	said getMD5 function adds the file's absolute path and its hash to a global HashMap.
@@ -373,7 +373,7 @@ public class DSProjectController {
 					
 				}			
 			}
-			*/
+			
 			if(fileItem.getChildren().size() > 0){
 				System.out.println("Adding " + singleFile.getName());
 				fileItem.getChildren().add(new TreeItem<String>(singleFile.getAbsoluteFile().toString()));
