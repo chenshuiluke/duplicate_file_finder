@@ -45,7 +45,7 @@ public class DSProjectController {
 	private boolean filterSize = true;
 	private boolean filterExtension = false;
 	private boolean hashLargeMD5Files = false;
-	private HashBiMap<String, String> fileNameToMD5HashMap = HashBiMap.create();
+	private HashMap<String, String> fileNameToMD5HashMap = new HashMap<>();
 
 
 	@FXML
@@ -264,7 +264,7 @@ public class DSProjectController {
 				
 				HashCode hashCode = com.google.common.io.Files.hash(file, Hashing.md5());
 				md5 = hashCode.toString();
-				//fileNameToMD5HashMap.put(file.getAbsolutePath(), md5);
+				fileNameToMD5HashMap.put(file.getAbsolutePath(), md5);
 				// toggleHashProgressBar();
 			}
 			else{
