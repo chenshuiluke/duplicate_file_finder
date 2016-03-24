@@ -35,8 +35,13 @@
                   <Font size="18.0" />
                </font>
             </Label>
-            <CheckBox fx:id="md5CheckBox" mnemonicParsing="false" onMouseClicked="#toggleMD5Filter" selected="true" text="MD5" />
-            <CheckBox fx:id="sizeCheckBox" layoutX="10.0" layoutY="31.0" mnemonicParsing="false" onMouseClicked="#toggleSizeFilter" text="Size" />
+            <HBox>
+               <children>
+                  <CheckBox fx:id="md5CheckBox" mnemonicParsing="false" onMouseClicked="#toggleMD5Filter" selected="true" text="MD5" />
+                  <CheckBox mnemonicParsing="false" onAction="#toggleHashLargeFiles" text="Hash Large Files" />
+               </children>
+            </HBox>
+            <CheckBox fx:id="sizeCheckBox" layoutX="10.0" layoutY="31.0" mnemonicParsing="false" onMouseClicked="#toggleSizeFilter" selected="true" text="Size" />
             <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Extension Filter" />
             <HBox fx:id="extensionFilterHBox">
                <children>

@@ -35,14 +35,19 @@ import java.util.concurrent.CountDownLatch;
 import org.apache.commons.io.comparator.SizeFileComparator;
 import org.apache.commons.io.FilenameUtils;
 import com.google.common.collect.HashBiMap;
+import com.google.common.hash.HashCode;
+import com.google.common.hash.Hashing;
 public class DSProjectController {
 
 	private LinkedList fileList = new LinkedList();
 	private File searchDirectory = null;
 	private boolean filterMD5 = true;
-	private boolean filterSize = false;
+	private boolean filterSize = true;
 	private boolean filterExtension = false;
+	private boolean hashLargeMD5Files = false;
 	private HashBiMap<String, String> fileNameToMD5HashMap = HashBiMap.create();
+
+
 	@FXML
     private Button applyFilterButton;
 	
@@ -61,7 +66,10 @@ public class DSProjectController {
     void toggleExtensionFilter() {
 		filterExtension = !filterExtension;
     }
-	
+    @FXML
+    void toggleHashLargeFiles() {
+    	hashLargeMD5Files = !hashLargeMD5Files;
+    }	
 	
 	Task<Void> returnNewTask(){
 		return new Task<Void>(){
@@ -239,20 +247,25 @@ public class DSProjectController {
 	private String getMD5(File file){
 		String md5 = "";
 		try{
-			
+			if(!hashLargeMD5Files){
+				if(file.length() > 10485760){
+					return file.getAbsolutePath();
+				}
+			}
 			String temp = fileNameToMD5HashMap.get(file.getAbsolutePath());
 			if(temp == null){
-				toggleHashProgressBar();
-				FileInputStream fis = new FileInputStream(file);
+				//toggleHashProgressBar();
+				
 				System.out.println("Hashing " + file.getAbsolutePath());
 				if(file.length() > 104857600)
 					printToStatus("Hashing an EXTREMELY large file. This could take a rather long time: " + file.getAbsolutePath());
 				if(file.length() > 52428800 && file.length() < 104857600)
 					printToStatus("Hashing a somewhat large file. This might take a little while: " + file.getAbsolutePath());
-				md5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
-				fileNameToMD5HashMap.put(file.getAbsolutePath(), md5);
-				fis.close();
-				toggleHashProgressBar();
+				
+				HashCode hashCode = com.google.common.io.Files.hash(file, Hashing.md5());
+				md5 = hashCode.toString();
+				//fileNameToMD5HashMap.put(file.getAbsolutePath(), md5);
+				// toggleHashProgressBar();
 			}
 			else{
 				md5 = temp;
@@ -346,20 +359,21 @@ public class DSProjectController {
 			//Kinda like the direct sub folder after the Root node called "Duplicates"
 
 			populateList(singleFile, searchDirectory, fileItem, nodeCopyList);
+			/*
 			if(filterMD5){
 				if(fileNameToMD5HashMap.inverse().get(getMD5(singleFile)) != null){ //
 					continue;
 				}	
 				else{
 					nodeCopyListHashes.add(getMD5(singleFile));
-					/*
-						Won't require rehashing in the getMd5 function, because, for each file hashed,
-						said getMD5 function adds the file's absolute path and its hash to a global HashMap.
-						This means it won't need to rehash the file if a hash for the file exists in the map.
-					*/
+					
+					//	Won't require rehashing in the getMd5 function, because, for each file hashed,
+					//	said getMD5 function adds the file's absolute path and its hash to a global HashMap.
+					//	This means it won't need to rehash the file if a hash for the file exists in the map.
+					
 				}			
 			}
-
+			*/
 			if(fileItem.getChildren().size() > 0){
 				System.out.println("Adding " + singleFile.getName());
 				fileItem.getChildren().add(new TreeItem<String>(singleFile.getAbsoluteFile().toString()));
