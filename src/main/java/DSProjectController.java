@@ -79,7 +79,7 @@ public class DSProjectController {
 		            @Override public void run() {
 		            	progressBarIndicator.setVisible(true);
 						folderButton.setDisable(true);
-						duplicateList.setDisable(true);
+						//duplicateList.setDisable(true);
 						applyFilterButton.setDisable(true);
 						removeOtherDuplicatesButton.setDisable(true);
 						removeDuplicateButton.setDisable(true);
@@ -90,7 +90,8 @@ public class DSProjectController {
             @Override public void run() {
 				progressBarIndicator.setVisible(false);
 				folderButton.setDisable(false);
-				duplicateList.setDisable(false);
+				//duplicateList.setDisable(false);
+				applyFilterButton.setDisable(false);
             }
         });
 				return null;
@@ -339,11 +340,6 @@ public class DSProjectController {
 		for(int counter = 0; counter < fileList.size(); counter++){
 			final float progress = counter; //final because its required
 	        Platform.runLater(new Runnable() {
-	        	/*
-					If I don't use runAndWait instead of Platform.runLater 
-					the program will lag for a loong time even after the duplicates are found
-					because of the pending UI changes, so this makes it run and wait until the progress ui is changed.
-	        	*/
 	            @Override public void run() {
 	            	progressBarIndicator.setProgress((progress / fileList.size()));
 	            }
@@ -360,23 +356,25 @@ public class DSProjectController {
 
 			populateList(singleFile, searchDirectory, fileItem, nodeCopyList);
 			
-			if(filterMD5){
-				if(nodeCopyListHashes.inverse().get(getMD5(singleFile)) != null){ //
-					continue;
-				}	
-				else{
-					nodeCopyListHashes.put(getMD5(singleFile), singleFile.getAbsolutePath());
-					
-					//	Won't require rehashing in the getMd5 function, because, for each file hashed,
-					//	said getMD5 function adds the file's absolute path and its hash to a global HashMap.
-					//	This means it won't need to rehash the file if a hash for the file exists in the map.
-					
-				}			
-			}
 			
 			if(fileItem.getChildren().size() > 0){
-				System.out.println("Adding " + singleFile.getName());
-				fileItem.getChildren().add(new TreeItem<String>(singleFile.getAbsoluteFile().toString()));
+				if(filterMD5){
+					if(nodeCopyListHashes.get(getMD5(singleFile)) != null){ //
+						continue;
+					}	
+					else{
+						nodeCopyListHashes.put(getMD5(singleFile), singleFile.getAbsolutePath());
+						System.out.println("Adding " + singleFile.getName());
+						fileItem.getChildren().add(new TreeItem<String>(singleFile.getAbsoluteFile().toString()));
+						
+						/*
+						Won't require rehashing in the getMd5 function, because, for each file hashed,
+						said getMD5 function adds the file's absolute path and its hash to a global HashMap.
+						This means it won't need to rehash the file if a hash for the file exists in the map.
+						*/
+						
+					}			
+				}
 				Platform.runLater(new Runnable(){
 					@Override public void run() {
 						duplicateList.getRoot().getChildren().add(fileItem);
