@@ -47,34 +47,81 @@ public class DSProjectController {
 	private boolean hashLargeMD5Files = false;
 	private HashMap<String, String> fileNameToMD5HashMap = new HashMap<>();
 
-
 	@FXML
-    private Button applyFilterButton;
+    private Button applyFilterButton; //When clicked, it starts a search with all enabled filters
 	
     @FXML
-    private TextArea statusText;
+    private TextArea statusText; //This is where status logs are posted
 
     @FXML
     private ProgressBar progressBarIndicator;
 
     @FXML
-    private HBox extensionFilterHBox;
+    private HBox extensionFilterHBox;  
 
     @FXML
-    private ProgressIndicator hashBar;	
+    private ProgressIndicator hashCircle;	//Is displayed when hashing a file.
+	//The following two are enabled when a non-group duplicate file node is selected.
+    @FXML
+    private Button removeOtherDuplicatesButton; //This removes all siblings of the selected nodes.
+    @FXML
+    private Button removeDuplicateButton; //This removes the selected child node.
+    @FXML
+    private CheckBox md5CheckBox; //When clicked, it toggles whether or not to filter by md5 hash.
+
+    @FXML
+    private CheckBox sizeCheckBox; //When clicked, it toggles whether or not to filter by file size.
+
+	
+	//The following 3 Text elements display information on the selected file
+    @FXML
+    private Text selectedFileName;
+
+    @FXML
+    private Text selectedFileSize;
+
+    @FXML
+    private Text selectedFileHash;
+
+	//This is where the user enters the extension to filter by
+	@FXML
+    private TextField extensionFilterTextBox;
+
+	//When clicked, it takes the applied filters and starts the search for duplicates
+    @FXML
+    private Button folderButton;
+
+    @FXML
+    private ResourceBundle resources;
+
+    @FXML
+    private URL location;
+
+    @FXML
+    private TreeView<String> duplicateList; //The TreeView that shows all duplications
+
+
     @FXML
     void toggleExtensionFilter() {
 		filterExtension = !filterExtension;
-    }
+	}
+
+
     @FXML
     void toggleHashLargeFiles() {
     	hashLargeMD5Files = !hashLargeMD5Files;
     }	
-	
+
+	//Returns a JavaFX task, which runs the surrounded code in a separate thread from the main GUI thread
 	Task<Void> returnNewTask(){
 		return new Task<Void>(){
 			@Override
 			protected Void call() throws Exception{
+				
+				/*
+				Platform.runLater runs the surrounded code on the GUI thread.
+				This is because modifications to the GUI should ideally be run on the GUI thread.
+				*/
 		        Platform.runLater(new Runnable() {
 		            @Override public void run() {
 		            	progressBarIndicator.setVisible(true);
@@ -85,7 +132,7 @@ public class DSProjectController {
 						removeDuplicateButton.setDisable(true);
 		            }
 		        });
-				populateTreeViewAndRemoveExcess(searchDirectory);
+				populateTreeViewAndRemoveExcess(searchDirectory); //Populates TreeView with duplicates
         Platform.runLater(new Runnable() {
             @Override public void run() {
 				progressBarIndicator.setVisible(false);
@@ -99,7 +146,7 @@ public class DSProjectController {
 		};		
 	} 
     @FXML
-    void removeOthersOnClick(ActionEvent event) {
+    void removeOthersOnClick(ActionEvent event) {//Removes siblings of the selected child node
     	try{
 
 	     	TreeItem<String> treeItem= duplicateList.getSelectionModel().getSelectedItem();
@@ -130,15 +177,15 @@ public class DSProjectController {
     	}
 
     }
-    private void toggleHashProgressBar(){
+    private void toggleHashProgressBar(){ //toggles whether the hash progress indicator is shown
     	Platform.runLater(new Runnable(){
     		@Override public void run(){
-    			hashBar.setVisible(!hashBar.isVisible());
+    			hashCircle.setVisible(!hashCircle.isVisible());
     		}
     	});
     }
     @FXML
-    void removeDuplicateOnClick(ActionEvent event) {
+    void removeDuplicateOnClick(ActionEvent event) { //Removes the selected child node
     	try{
 	     	TreeItem<String> treeItem= duplicateList.getSelectionModel().getSelectedItem();
 	     	if(treeItem.getChildren().size() == 0){
@@ -163,27 +210,8 @@ public class DSProjectController {
 
 
     }
-    @FXML
-    private Button removeOtherDuplicatesButton;
-    @FXML
-    private Button removeDuplicateButton;
-    @FXML
-    private CheckBox md5CheckBox;
 
-    @FXML
-    private CheckBox sizeCheckBox;
-
-    @FXML
-    private Text selectedFileName;
-
-    @FXML
-    private Text selectedFileSize;
-
-    @FXML
-    private Text selectedFileHash;
-
-	@FXML
-    private TextField extensionFilterTextBox;
+	//The following, when called, toggles their respective duplicate filter
     @FXML
     void toggleMD5Filter() {
     	printToStatus("Toggling MD5 filter.");
@@ -206,21 +234,9 @@ public class DSProjectController {
     	}
     }
 
+	
     @FXML
-    private Button folderButton;
-
-    @FXML
-    private ResourceBundle resources;
-
-    @FXML
-    private URL location;
-
-    @FXML
-    private TreeView<String> duplicateList;
-
-
-    @FXML
-    void getSelected(){
+    void getSelected(){ //Displays the information about the selected file
 		TreeItem<String> treeItem= duplicateList.getSelectionModel().getSelectedItem();
 		if(treeItem != null){
 			String item = treeItem.getValue();
@@ -234,7 +250,7 @@ public class DSProjectController {
 					removeDuplicateButton.setDisable(false);
 					removeOtherDuplicatesButton.setDisable(false);
 				}
-				else{
+				else{ //If the selected item is null, reset the file description text boxes.
 					selectedFileName.setText("Name: ");
 					selectedFileSize.setText("Size: ");
 					selectedFileHash.setText("Hash: ");
@@ -245,19 +261,21 @@ public class DSProjectController {
 
 		}
     }
-	private String getMD5(File file){
+	private String getMD5(File file){ //Returns the hash of the selected file
 		String md5 = "";
 		try{
-			if(!hashLargeMD5Files){
+			if(!hashLargeMD5Files){ //Doesn't hash a large file unless the checkbox is checked
 				if(file.length() > 104857600){
 					return file.getAbsolutePath();
 				}
 			}
+			//Checks if the hash of the file already exists in the map
 			String temp = fileNameToMD5HashMap.get(file.getAbsolutePath());
-			if(temp == null){
+			if(temp == null){ //If no hash exists...
 				toggleHashProgressBar();
 				
 				System.out.println("Hashing " + file.getAbsolutePath());
+				//Notifies the user if a very large file is being hashed, and tells them to be patient.
 				if(file.length() > 1073741824)
 					printToStatus("Hashing an EXTREMELY large file. This could take a rather long time: " + file.getAbsolutePath());
 				if(file.length() > 52428800 && file.length() < 104857600)
@@ -268,7 +286,7 @@ public class DSProjectController {
 				fileNameToMD5HashMap.put(file.getAbsolutePath(), md5);
 				toggleHashProgressBar();
 			}
-			else{
+			else{//If the hash is in the map, just return it.
 				md5 = temp;
 			}		
 			
@@ -278,10 +296,11 @@ public class DSProjectController {
 		}
 		return md5;
 	}
-	private void clearList(){
+	private void clearList(){ //Clears the tableview
 		duplicateList.getRoot().getChildren().setAll(FXCollections.observableArrayList()); //Empties the current duplicate list
 	}
 	LinkedList getFileList(File file){
+		//Recursively gets contents of the search directory
 		LinkedList list = new LinkedList();
 		
 		if(file.isFile()){	
@@ -314,7 +333,7 @@ public class DSProjectController {
 		return list;
 	}
 
-	void printToStatus(String input){
+	void printToStatus(String input){ //A convenience method to modify the status textbox on the gui thread that's called from the non-gui thread.
         Platform.runLater(new Runnable() {
             @Override public void run() {
             	statusText.appendText(input + System.getProperty("line.separator"));
@@ -334,7 +353,6 @@ public class DSProjectController {
 		/*
 			offers constant time performance for the basic operations 
 			(add, remove, contains and size).
-			So checking for extras is generally 0(1)
 		*/
 		HashBiMap<String, String> nodeCopyListHashes = HashBiMap.create();
 		for(int counter = 0; counter < fileList.size(); counter++){
@@ -354,10 +372,10 @@ public class DSProjectController {
 			TreeItem<String> fileItem = new TreeItem<String> (singleFile.getAbsolutePath());
 			//Kinda like the direct sub folder after the Root node called "Duplicates"
 
-			populateList(singleFile, searchDirectory, fileItem, nodeCopyList);
+			getListOfDuplicates(singleFile, searchDirectory, fileItem, nodeCopyList);
 			
 			
-			if(fileItem.getChildren().size() > 0){
+			if(fileItem.getChildren().size() > 0){ //If the current node is a parent node...aka has a child or two..
 				if(filterMD5){
 					if(nodeCopyListHashes.get(getMD5(singleFile)) != null){ //
 						continue;
@@ -375,7 +393,7 @@ public class DSProjectController {
 						
 					}			
 				}
-				Platform.runLater(new Runnable(){
+				Platform.runLater(new Runnable(){ //If all is okay, add the new parent node to the root node.
 					@Override public void run() {
 						duplicateList.getRoot().getChildren().add(fileItem);
 					}
@@ -383,7 +401,7 @@ public class DSProjectController {
 			}
 			
 		}
-        Platform.runLater(new Runnable() {
+        Platform.runLater(new Runnable() { //Sets the progressbar to indeterminate
             @Override public void run() {
             	progressBarIndicator.setProgress(-1);
             }
@@ -392,17 +410,17 @@ public class DSProjectController {
 		System.gc();
 	}
     @FXML
-    void selectFolder(ActionEvent event) {
+    void selectFolder(ActionEvent event) { //Prompts the user to choose a directory to search.
 		DirectoryChooser chooser = new DirectoryChooser();
 		chooser.setTitle("Choose Directory");
 		File directory = chooser.showDialog(sizeCheckBox.getScene().getWindow());
-		if(directory != null){
+		if(directory != null){ //If the user didn't press cancel and selected a valid folder...
 			
 			searchDirectory = directory; 
 			clearList();
 
 
-			(new Thread(returnNewTask())).start();
+			(new Thread(returnNewTask())).start(); //Starts the duplicate file search in a new thread
 
 			System.gc();
 		}
@@ -413,13 +431,13 @@ public class DSProjectController {
 	boolean isAbsoluteFilePathEqual(File origin, File file){
 		return file.getAbsoluteFile().toString().equals(origin.getAbsoluteFile().toString());
 	}
-	void populateList(File original, File file, TreeItem<String> node, HashSet<String> nodeList){
-		//add file only
-		//ArrayList<String> list = new ArrayList<>();
+	void getListOfDuplicates(File original, File file, TreeItem<String> node, HashSet<String> nodeList){
+		/*
+		Accepts a treeitem parent node, then recursively checks if they are duplictes of the original file
+		if the file is a duplicate, it adds a child node to the new passed node.
+		*/
 		if(file.isFile()){
 			if(!isAbsoluteFilePathEqual(original, file)){
-				//System.out.println("Verifying " + file.getName());
-				//printToStatus("Verifying " + file.getName());
 
 				if(filterSize){ 
 					/*
@@ -463,7 +481,7 @@ public class DSProjectController {
 			if(subNote != null){
 				for(String filename : subNote){
 					File temp = new File(file, filename);
-					populateList(original, temp, node, nodeList);
+					getListOfDuplicates(original, temp, node, nodeList);
 					
 				}
 			}
