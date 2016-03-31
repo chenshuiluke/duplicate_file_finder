@@ -249,7 +249,7 @@ public class DSProjectController {
 		String md5 = "";
 		try{
 			if(!hashLargeMD5Files){
-				if(file.length() > 104857600){
+				if(file.length() > 104857600){ //100MB
 					return file.getAbsolutePath();
 				}
 			}
@@ -258,9 +258,9 @@ public class DSProjectController {
 				toggleHashProgressBar();
 				
 				System.out.println("Hashing " + file.getAbsolutePath());
-				if(file.length() > 1073741824)
+				if(file.length() > 1073741824) //1GB
 					printToStatus("Hashing an EXTREMELY large file. This could take a rather long time: " + file.getAbsolutePath());
-				if(file.length() > 52428800 && file.length() < 104857600)
+				if(file.length() > 52428800 && file.length() < 1073741824)
 					printToStatus("Hashing a somewhat large file. This might take a little while: " + file.getAbsolutePath());
 				
 				HashCode hashCode = com.google.common.io.Files.hash(file, Hashing.md5());
@@ -354,7 +354,7 @@ public class DSProjectController {
 			TreeItem<String> fileItem = new TreeItem<String> (singleFile.getAbsolutePath());
 			//Kinda like the direct sub folder after the Root node called "Duplicates"
 
-			populateList(singleFile, searchDirectory, fileItem, nodeCopyList);
+			populateList(singleFile, fileItem, nodeCopyList);
 			
 			
 			if(fileItem.getChildren().size() > 0){
@@ -413,60 +413,54 @@ public class DSProjectController {
 	boolean isAbsoluteFilePathEqual(File origin, File file){
 		return file.getAbsoluteFile().toString().equals(origin.getAbsoluteFile().toString());
 	}
-	void populateList(File original, File file, TreeItem<String> node, HashSet<String> nodeList){
+	void populateList(File original, TreeItem<String> node, HashSet<String> nodeList){
 		//add file only
 		//ArrayList<String> list = new ArrayList<>();
-		if(file.isFile()){
-			if(!isAbsoluteFilePathEqual(original, file)){
-				//System.out.println("Verifying " + file.getName());
-				//printToStatus("Verifying " + file.getName());
+		for(int counter = 0; counter < fileList.size(); counter++){
+			File file = fileList.returna(counter);
+			if(file.isFile()){
+				if(!isAbsoluteFilePathEqual(original, file)){
+					//System.out.println("Verifying " + file.getName());
+					//printToStatus("Verifying " + file.getName());
 
-				if(filterSize){ 
-					/*
-					Files need to be of the same size to have the same hashes, so this filter weeds out the majority 
-					of all duplicate candidates before a hash even needs to be calculated 
-					*/
-					if(!(file.length() == original.length())){
-						return;
+					if(filterSize){ 
+						/*
+						Files need to be of the same size to have the same hashes, so this filter weeds out the majority 
+						of all duplicate candidates before a hash even needs to be calculated 
+						*/
+						if(file.length() != original.length()){
+							continue;
+						}
 					}
-				}
-				if(filterMD5){
-					if(!verifyMD5(original, file)){
-						return;
+					if(filterMD5){
+						if(!verifyMD5(original, file)){
+							continue;
+						}
 					}
-				}
-				if(filterExtension && extensionFilterTextBox.getText().length() > 0){
-					String fileName = file.getAbsoluteFile().toString();
-					System.out.println("Trying to filter: " + fileName);
-					String filter = extensionFilterTextBox.getText();
+					if(filterExtension && extensionFilterTextBox.getText().length() > 0){
+						String fileName = file.getAbsoluteFile().toString();
+						System.out.println("Trying to filter: " + fileName);
+						String filter = extensionFilterTextBox.getText();
+						
+						String lastPartOfFileName = fileName.substring(fileName.length() - filter.length(), fileName.length());
 					
-					String lastPartOfFileName = fileName.substring(fileName.length() - filter.length(), fileName.length());
-				
-					if(!filter.equals(lastPartOfFileName)){ //trtr.doc doc filter
-						System.out.println("Excluding " + fileName);
-						return;
+						if(!filter.equals(lastPartOfFileName)){ //trtr.doc doc filter
+							System.out.println("Excluding " + fileName);
+							continue;
+						}
 					}
-				}
-				//System.out.println("Adding " + file.getName());
-				//printToStatus("Adding " + file.getName());
-				TreeItem<String> newTreeItem = new TreeItem<>(file.getAbsolutePath());
+					//System.out.println("Adding " + file.getName());
+					//printToStatus("Adding " + file.getName());
+					TreeItem<String> newTreeItem = new TreeItem<>(file.getAbsolutePath());
 
-				
-				node.getChildren().add(newTreeItem);
-				
-				
-			}
-			
-		}
-		else if(file.isDirectory()){
-			String[] subNote = file.list();
-			if(subNote != null){
-				for(String filename : subNote){
-					File temp = new File(file, filename);
-					populateList(original, temp, node, nodeList);
+					
+					node.getChildren().add(newTreeItem);
+					
 					
 				}
+				
 			}
+
 		}
 	}
     @FXML
