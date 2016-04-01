@@ -37,6 +37,10 @@ import org.apache.commons.io.FilenameUtils;
 import com.google.common.collect.HashBiMap;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.io.IOException;
 public class DSProjectController {
 
 	private LinkedList fileList = new LinkedList();
@@ -170,7 +174,7 @@ public class DSProjectController {
 	     	}
 
     	}
-    	catch(java.io.IOException e){
+    	catch(IOException e){
     		System.out.println(e.getMessage());
     		clearList();
     		(new Thread(returnNewTask())).start();
@@ -202,7 +206,7 @@ public class DSProjectController {
 	     	}
 
     	}
-    	catch(java.io.IOException e){
+    	catch(IOException e){
     		System.out.println(e.getMessage());
     		clearList();
     		(new Thread(returnNewTask())).start();
@@ -264,8 +268,13 @@ public class DSProjectController {
 	private String getMD5(File file){ //Returns the hash of the selected file
 		String md5 = "";
 		try{
+<<<<<<< HEAD
 			if(!hashLargeMD5Files){ //Doesn't hash a large file unless the checkbox is checked
 				if(file.length() > 104857600){
+=======
+			if(!hashLargeMD5Files){
+				if(file.length() > 104857600){ //100MB
+>>>>>>> f5a66ba0b810e38aa7194911ada8f491fa685d39
 					return file.getAbsolutePath();
 				}
 			}
@@ -275,10 +284,14 @@ public class DSProjectController {
 				toggleHashProgressBar();
 				
 				System.out.println("Hashing " + file.getAbsolutePath());
+<<<<<<< HEAD
 				//Notifies the user if a very large file is being hashed, and tells them to be patient.
 				if(file.length() > 1073741824)
+=======
+				if(file.length() > 1073741824) //1GB
+>>>>>>> f5a66ba0b810e38aa7194911ada8f491fa685d39
 					printToStatus("Hashing an EXTREMELY large file. This could take a rather long time: " + file.getAbsolutePath());
-				if(file.length() > 52428800 && file.length() < 104857600)
+				if(file.length() > 52428800 && file.length() < 1073741824)
 					printToStatus("Hashing a somewhat large file. This might take a little while: " + file.getAbsolutePath());
 				
 				HashCode hashCode = com.google.common.io.Files.hash(file, Hashing.md5());
@@ -291,7 +304,7 @@ public class DSProjectController {
 			}		
 			
 		}
-		catch(java.io.IOException i_exc){
+		catch(IOException i_exc){
 			i_exc.printStackTrace();
 		}
 		return md5;
@@ -299,36 +312,86 @@ public class DSProjectController {
 	private void clearList(){ //Clears the tableview
 		duplicateList.getRoot().getChildren().setAll(FXCollections.observableArrayList()); //Empties the current duplicate list
 	}
+<<<<<<< HEAD
 	LinkedList getFileList(File file){
 		//Recursively gets contents of the search directory
+=======
+	LinkedList getFileList(File currFile){
+>>>>>>> f5a66ba0b810e38aa7194911ada8f491fa685d39
 		LinkedList list = new LinkedList();
-		
-		if(file.isFile()){	
+		try{
+			
+			Files.walkFileTree(Paths.get(currFile.getAbsolutePath()), new FileVisitor<Path>(){
+	             // Called after a directory visit is complete.
+	            @Override
+	            public FileVisitResult postVisitDirectory(Path dir, IOException exc){
+	                return FileVisitResult.CONTINUE;
+	            }
+	            // called before a directory visit.
+	            @Override
+	            public FileVisitResult preVisitDirectory(Path dir,
+	            		  BasicFileAttributes attrs) throws IOException {
+	                return FileVisitResult.CONTINUE;
+	            }
+
+	            @Override
+	            public FileVisitResult visitFile(Path currFile,
+	                    BasicFileAttributes attrs) throws IOException {
+					if(filterExtension && extensionFilterTextBox.getText().length() > 0){
+						String currFileName = currFile.toFile().getAbsolutePath();
+						System.out.println("Trying to filter: " + currFileName);
+						String filter = extensionFilterTextBox.getText();
+						
+						String lastPartOfFileName = currFileName.substring(currFileName.length() - filter.length(), currFileName.length());
+					
+						if(!filter.equals(lastPartOfFileName)){ //trtr.doc doc filter
+							System.out.println("Excluding " + currFileName);
+							return FileVisitResult.CONTINUE;
+						}
+					}
+					System.out.println(currFile.getFileName());
+					list.insertf(currFile.toFile());
+	                return FileVisitResult.CONTINUE;
+	            }
+	    		@Override
+	            public FileVisitResult visitFileFailed(Path file, IOException exc)
+	                    throws IOException {
+	                return FileVisitResult.CONTINUE;
+	            }	
+			});
+		}
+		catch(IOException exc){
+			exc.printStackTrace();
+		}
+
+		/*
+		if(currFile.isFile() && currFile.canRead()){	
 			if(filterExtension && extensionFilterTextBox.getText().length() > 0){
-				String fileName = file.getAbsoluteFile().toString();
-				System.out.println("Trying to filter: " + fileName);
+				String currFileName = currFile.getAbsoluteFile().toString();
+				System.out.println("Trying to filter: " + currFileName);
 				String filter = extensionFilterTextBox.getText();
 				
-				String lastPartOfFileName = fileName.substring(fileName.length() - filter.length(), fileName.length());
+				String lastPartOfFileName = currFileName.substring(currFileName.length() - filter.length(), currFileName.length());
 			
 				if(!filter.equals(lastPartOfFileName)){ //trtr.doc doc filter
-					System.out.println("Excluding " + fileName);
+					System.out.println("Excluding " + currFileName);
 					return list;
 				}
 			}
 
-			System.out.println("Is file: " + file.getAbsoluteFile().toString());
-			list.insertf(file);
+			System.out.println("Is currFile: " + currFile.getAbsoluteFile().toString());
+			list.insertf(currFile);
 		}
-		else if(file.isDirectory()){
-			String[] files = file.list();
-			if(files != null){
-				for(String entry : files){
-					File temp = new File(file, entry);
+		else if(currFile.isDirectory()){
+			String[] currFiles = currFile.list();
+			if(currFiles != null){
+				for(String entry : currFiles){
+					File temp = new File(currFile, entry);
 					list.concat(getFileList(temp));
 				}
 			}
 		}
+		*/
 		System.gc();
 		return list;
 	}
@@ -372,8 +435,13 @@ public class DSProjectController {
 			TreeItem<String> fileItem = new TreeItem<String> (singleFile.getAbsolutePath());
 			//Kinda like the direct sub folder after the Root node called "Duplicates"
 
+<<<<<<< HEAD
 			getListOfDuplicates(singleFile, searchDirectory, fileItem, nodeCopyList);
 			
+=======
+			populateList(searchDirectory, singleFile, fileItem, nodeCopyList);
+			System.gc();
+>>>>>>> f5a66ba0b810e38aa7194911ada8f491fa685d39
 			
 			if(fileItem.getChildren().size() > 0){ //If the current node is a parent node...aka has a child or two..
 				if(filterMD5){
@@ -431,6 +499,7 @@ public class DSProjectController {
 	boolean isAbsoluteFilePathEqual(File origin, File file){
 		return file.getAbsoluteFile().toString().equals(origin.getAbsoluteFile().toString());
 	}
+<<<<<<< HEAD
 	void getListOfDuplicates(File original, File file, TreeItem<String> node, HashSet<String> nodeList){
 		/*
 		Accepts a treeitem parent node, then recursively checks if they are duplictes of the original file
@@ -446,29 +515,123 @@ public class DSProjectController {
 					*/
 					if(!(file.length() == original.length())){
 						return;
-					}
-				}
-				if(filterMD5){
-					if(!verifyMD5(original, file)){
-						return;
-					}
-				}
-				if(filterExtension && extensionFilterTextBox.getText().length() > 0){
-					String fileName = file.getAbsoluteFile().toString();
-					System.out.println("Trying to filter: " + fileName);
-					String filter = extensionFilterTextBox.getText();
-					
-					String lastPartOfFileName = fileName.substring(fileName.length() - filter.length(), fileName.length());
-				
-					if(!filter.equals(lastPartOfFileName)){ //trtr.doc doc filter
-						System.out.println("Excluding " + fileName);
-						return;
-					}
-				}
-				//System.out.println("Adding " + file.getName());
-				//printToStatus("Adding " + file.getName());
-				TreeItem<String> newTreeItem = new TreeItem<>(file.getAbsolutePath());
+=======
+	void populateList(File original, File compare, TreeItem<String> node, HashSet<String> nodeList){
 
+		try{
+			
+			Files.walkFileTree(Paths.get(original.getAbsolutePath()), new FileVisitor<Path>(){
+	             // Called after a directory visit is complete.
+	            @Override
+	            public FileVisitResult postVisitDirectory(Path dir, IOException exc){
+	                return FileVisitResult.CONTINUE;
+	            }
+	            // called before a directory visit.
+	            @Override
+	            public FileVisitResult preVisitDirectory(Path dir,
+	            		  BasicFileAttributes attrs) throws IOException {
+	                return FileVisitResult.CONTINUE;
+	            }
+
+	            @Override
+	            public FileVisitResult visitFile(Path currFile,
+	                    BasicFileAttributes attrs) throws IOException {
+	            	File file = currFile.toFile().getAbsoluteFile();
+					if(file.isFile()){
+						//System.out.println(compare.getAbsolutePath() + " - " + file.getAbsolutePath());
+						if(!isAbsoluteFilePathEqual(compare, file)){
+							//System.out.println("Verifying " + file.getName());
+							//printToStatus("Verifying " + file.getName());
+
+							if(filterSize){ 
+								
+								//Files need to be of the same size to have the same hashes, so this filter weeds out the majority 
+								//of all duplicate candidates before a hash even needs to be calculated 
+								
+								if(file.length() != compare.length()){
+									return FileVisitResult.CONTINUE;
+								}
+							}
+							if(filterMD5){
+								if(!verifyMD5(compare, file)){
+									return FileVisitResult.CONTINUE;
+								}
+							}
+							if(filterExtension && extensionFilterTextBox.getText().length() > 0){
+								String fileName = file.getAbsoluteFile().toString();
+								System.out.println("Trying to filter: " + fileName);
+								String filter = extensionFilterTextBox.getText();
+								
+								String lastPartOfFileName = fileName.substring(fileName.length() - filter.length(), fileName.length());
+							
+								if(!filter.equals(lastPartOfFileName)){ //trtr.doc doc filter
+									System.out.println("Excluding " + fileName);
+									return FileVisitResult.CONTINUE;
+								}
+							}
+							//System.out.println("Adding " + file.getName());
+							//printToStatus("Adding " + file.getName());
+							TreeItem<String> newTreeItem = new TreeItem<>(file.getAbsolutePath());
+							
+							node.getChildren().add(newTreeItem);
+							
+							
+						}
+						
+					}
+	                return FileVisitResult.CONTINUE;
+	            }
+	    		@Override
+	            public FileVisitResult visitFileFailed(Path file, IOException exc)
+	                    throws IOException {
+	                return FileVisitResult.CONTINUE;
+	            }	
+			});
+		}
+		catch(IOException exc){
+			exc.printStackTrace();
+		}
+/*		//add file only
+		//ArrayList<String> list = new ArrayList<>();
+		for(int counter = 0; counter < fileList.size(); counter++){
+			File file = fileList.returna(counter);
+			if(file.isFile()){
+				if(!isAbsoluteFilePathEqual(original, file)){
+					//System.out.println("Verifying " + file.getName());
+					//printToStatus("Verifying " + file.getName());
+
+					if(filterSize){ 
+						
+						//Files need to be of the same size to have the same hashes, so this filter weeds out the majority 
+						//of all duplicate candidates before a hash even needs to be calculated 
+						
+						if(file.length() != original.length()){
+							continue;
+						}
+>>>>>>> f5a66ba0b810e38aa7194911ada8f491fa685d39
+					}
+					if(filterMD5){
+						if(!verifyMD5(original, file)){
+							continue;
+						}
+					}
+					if(filterExtension && extensionFilterTextBox.getText().length() > 0){
+						String fileName = file.getAbsoluteFile().toString();
+						System.out.println("Trying to filter: " + fileName);
+						String filter = extensionFilterTextBox.getText();
+						
+						String lastPartOfFileName = fileName.substring(fileName.length() - filter.length(), fileName.length());
+					
+						if(!filter.equals(lastPartOfFileName)){ //trtr.doc doc filter
+							System.out.println("Excluding " + fileName);
+							continue;
+						}
+					}
+					//System.out.println("Adding " + file.getName());
+					//printToStatus("Adding " + file.getName());
+					TreeItem<String> newTreeItem = new TreeItem<>(file.getAbsolutePath());
+
+<<<<<<< HEAD
 				
 				node.getChildren().add(newTreeItem);
 				
@@ -482,10 +645,17 @@ public class DSProjectController {
 				for(String filename : subNote){
 					File temp = new File(file, filename);
 					getListOfDuplicates(original, temp, node, nodeList);
+=======
+					
+					node.getChildren().add(newTreeItem);
+					
+>>>>>>> f5a66ba0b810e38aa7194911ada8f491fa685d39
 					
 				}
+				
 			}
-		}
+
+		}*/
 	}
     @FXML
     void initialize() {

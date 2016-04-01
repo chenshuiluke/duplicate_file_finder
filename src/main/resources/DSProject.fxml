@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
@@ -30,6 +31,7 @@
       <TreeView fx:id="duplicateList" onMouseClicked="#getSelected" prefHeight="400.0" prefWidth="317.0" GridPane.columnIndex="1" />
       <VBox prefHeight="400.0" prefWidth="147.0">
          <children>
+            <Button fx:id="folderButton" defaultButton="true" mnemonicParsing="false" onAction="#selectFolder" prefHeight="26.0" prefWidth="305.0" text="+" />
             <Label layoutX="10.0" layoutY="46.0" text="Filters">
                <font>
                   <Font size="18.0" />
@@ -51,15 +53,12 @@
             </HBox>
             <Button fx:id="applyFilterButton" mnemonicParsing="false" onAction="#applyFilter" text="Apply" />
             <Separator prefWidth="200.0" />
-            <Button fx:id="removeDuplicateButton" alignment="TOP_LEFT" disable="true" mnemonicParsing="false" onAction="#removeDuplicateOnClick" prefHeight="26.0" prefWidth="302.0" text="Remove Item" />
-            <Button fx:id="removeOtherDuplicatesButton" alignment="TOP_LEFT" disable="true" layoutX="10.0" layoutY="183.0" mnemonicParsing="false" onAction="#removeOthersOnClick" prefHeight="26.0" prefWidth="303.0" text="Remove All Other Items" wrapText="true" />
             <Label text="Logs">
                <font>
                   <Font size="18.0" />
                </font>
             </Label>
             <TextArea fx:id="statusText" editable="false" prefHeight="94.0" prefWidth="302.0" />
-            <Button fx:id="folderButton" defaultButton="true" mnemonicParsing="false" onAction="#selectFolder" prefHeight="26.0" prefWidth="305.0" text="Select Search Folder" />
             <ProgressBar fx:id="progressBarIndicator" prefWidth="5000.0" visible="false" VBox.vgrow="ALWAYS" />
             <ProgressIndicator fx:id="hashCircle" visible="false" />
          </children>
@@ -79,6 +78,15 @@
             <Text fx:id="selectedFileName" strokeType="OUTSIDE" strokeWidth="0.0" text="Name:" wrappingWidth="145.39617919921875" />
             <Text fx:id="selectedFileSize" strokeType="OUTSIDE" strokeWidth="0.0" text="Size:" wrappingWidth="148.39877319335938" />
             <Text fx:id="selectedFileHash" strokeType="OUTSIDE" strokeWidth="0.0" text="Hash:" wrappingWidth="298.4670715332031" />
+            <VBox prefHeight="96.0" prefWidth="299.0">
+               <children>
+                  <Button fx:id="removeDuplicateButton" alignment="TOP_LEFT" disable="true" mnemonicParsing="false" onAction="#removeDuplicateOnClick" prefHeight="26.0" prefWidth="302.0" text="Remove Item" />
+                  <Button fx:id="removeOtherDuplicatesButton" alignment="TOP_LEFT" disable="true" mnemonicParsing="false" onAction="#removeOthersOnClick" prefHeight="26.0" prefWidth="303.0" text="Remove All Other Items" wrapText="true" />
+               </children>
+               <VBox.margin>
+                  <Insets top="100.0" />
+               </VBox.margin>
+            </VBox>
          </children>
       </VBox>
    </children>
