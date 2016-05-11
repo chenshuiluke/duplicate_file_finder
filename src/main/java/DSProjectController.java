@@ -268,13 +268,8 @@ public class DSProjectController {
 	private String getMD5(File file){ //Returns the hash of the selected file
 		String md5 = "";
 		try{
-<<<<<<< HEAD
 			if(!hashLargeMD5Files){ //Doesn't hash a large file unless the checkbox is checked
 				if(file.length() > 104857600){
-=======
-			if(!hashLargeMD5Files){
-				if(file.length() > 104857600){ //100MB
->>>>>>> f5a66ba0b810e38aa7194911ada8f491fa685d39
 					return file.getAbsolutePath();
 				}
 			}
@@ -284,12 +279,8 @@ public class DSProjectController {
 				toggleHashProgressBar();
 				
 				System.out.println("Hashing " + file.getAbsolutePath());
-<<<<<<< HEAD
-				//Notifies the user if a very large file is being hashed, and tells them to be patient.
-				if(file.length() > 1073741824)
-=======
+
 				if(file.length() > 1073741824) //1GB
->>>>>>> f5a66ba0b810e38aa7194911ada8f491fa685d39
 					printToStatus("Hashing an EXTREMELY large file. This could take a rather long time: " + file.getAbsolutePath());
 				if(file.length() > 52428800 && file.length() < 1073741824)
 					printToStatus("Hashing a somewhat large file. This might take a little while: " + file.getAbsolutePath());
@@ -312,12 +303,8 @@ public class DSProjectController {
 	private void clearList(){ //Clears the tableview
 		duplicateList.getRoot().getChildren().setAll(FXCollections.observableArrayList()); //Empties the current duplicate list
 	}
-<<<<<<< HEAD
-	LinkedList getFileList(File file){
-		//Recursively gets contents of the search directory
-=======
 	LinkedList getFileList(File currFile){
->>>>>>> f5a66ba0b810e38aa7194911ada8f491fa685d39
+		//Recursively gets contents of the search directory
 		LinkedList list = new LinkedList();
 		try{
 			
@@ -435,13 +422,7 @@ public class DSProjectController {
 			TreeItem<String> fileItem = new TreeItem<String> (singleFile.getAbsolutePath());
 			//Kinda like the direct sub folder after the Root node called "Duplicates"
 
-<<<<<<< HEAD
-			getListOfDuplicates(singleFile, searchDirectory, fileItem, nodeCopyList);
-			
-=======
 			populateList(searchDirectory, singleFile, fileItem, nodeCopyList);
-			System.gc();
->>>>>>> f5a66ba0b810e38aa7194911ada8f491fa685d39
 			
 			if(fileItem.getChildren().size() > 0){ //If the current node is a parent node...aka has a child or two..
 				if(filterMD5){
@@ -499,23 +480,6 @@ public class DSProjectController {
 	boolean isAbsoluteFilePathEqual(File origin, File file){
 		return file.getAbsoluteFile().toString().equals(origin.getAbsoluteFile().toString());
 	}
-<<<<<<< HEAD
-	void getListOfDuplicates(File original, File file, TreeItem<String> node, HashSet<String> nodeList){
-		/*
-		Accepts a treeitem parent node, then recursively checks if they are duplictes of the original file
-		if the file is a duplicate, it adds a child node to the new passed node.
-		*/
-		if(file.isFile()){
-			if(!isAbsoluteFilePathEqual(original, file)){
-
-				if(filterSize){ 
-					/*
-					Files need to be of the same size to have the same hashes, so this filter weeds out the majority 
-					of all duplicate candidates before a hash even needs to be calculated 
-					*/
-					if(!(file.length() == original.length())){
-						return;
-=======
 	void populateList(File original, File compare, TreeItem<String> node, HashSet<String> nodeList){
 
 		try{
@@ -591,71 +555,6 @@ public class DSProjectController {
 		catch(IOException exc){
 			exc.printStackTrace();
 		}
-/*		//add file only
-		//ArrayList<String> list = new ArrayList<>();
-		for(int counter = 0; counter < fileList.size(); counter++){
-			File file = fileList.returna(counter);
-			if(file.isFile()){
-				if(!isAbsoluteFilePathEqual(original, file)){
-					//System.out.println("Verifying " + file.getName());
-					//printToStatus("Verifying " + file.getName());
-
-					if(filterSize){ 
-						
-						//Files need to be of the same size to have the same hashes, so this filter weeds out the majority 
-						//of all duplicate candidates before a hash even needs to be calculated 
-						
-						if(file.length() != original.length()){
-							continue;
-						}
->>>>>>> f5a66ba0b810e38aa7194911ada8f491fa685d39
-					}
-					if(filterMD5){
-						if(!verifyMD5(original, file)){
-							continue;
-						}
-					}
-					if(filterExtension && extensionFilterTextBox.getText().length() > 0){
-						String fileName = file.getAbsoluteFile().toString();
-						System.out.println("Trying to filter: " + fileName);
-						String filter = extensionFilterTextBox.getText();
-						
-						String lastPartOfFileName = fileName.substring(fileName.length() - filter.length(), fileName.length());
-					
-						if(!filter.equals(lastPartOfFileName)){ //trtr.doc doc filter
-							System.out.println("Excluding " + fileName);
-							continue;
-						}
-					}
-					//System.out.println("Adding " + file.getName());
-					//printToStatus("Adding " + file.getName());
-					TreeItem<String> newTreeItem = new TreeItem<>(file.getAbsolutePath());
-
-<<<<<<< HEAD
-				
-				node.getChildren().add(newTreeItem);
-				
-				
-			}
-			
-		}
-		else if(file.isDirectory()){
-			String[] subNote = file.list();
-			if(subNote != null){
-				for(String filename : subNote){
-					File temp = new File(file, filename);
-					getListOfDuplicates(original, temp, node, nodeList);
-=======
-					
-					node.getChildren().add(newTreeItem);
-					
->>>>>>> f5a66ba0b810e38aa7194911ada8f491fa685d39
-					
-				}
-				
-			}
-
-		}*/
 	}
     @FXML
     void initialize() {
